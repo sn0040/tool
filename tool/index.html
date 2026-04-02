@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>角色梯度排行工具 | 完美截图版</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: #121212;
+      color: #fff;
+      padding: 20px;
+    }
+
+    .title-box {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .title {
+      font-size: 26px;
+      color: #ffcc00;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    #screenshotBtn {
+      padding: 8px 20px;
+      background: #ff3333;
+      color: #fff;
+      border: none;
+      border-radius: 40px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    #screenshotBtn:hover {
+      background: #ff6666;
+      transform: scale(1.02);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .pool {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: #1e1e1e;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      min-height: 150px;
+      border: 1px solid #333;
+    }
+
+    .tier-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .tier-row {
+      display: flex;
+      align-items: stretch;
+      background: #222;
+      border-radius: 12px;
+      overflow: hidden;
+      min-height: 130px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .tier-label {
+      width: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: #fff;
+      flex-shrink: 0;
+      text-shadow: 0 1px 2px black;
+    }
+
+    .tier-label.t0 { background: #ff3333; }
+    .tier-label.t1 { background: #ff7722; }
+    .tier-label.t2 { background: #ffcc00; color:#1e1e1e; }
+    .tier-label.t3 { background: #33bb55; }
+    .tier-label.t4 { background: #4488ff; }
+    .tier-label.trash { background: #777; }
+
+    .tier-content {
+      flex: 1;
+      padding: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      background: #2a2a2a;
+      min-height: 130px;
+    }
+
+    /* 卡片核心尺寸 — 绝对刚硬，不允许变形 */
+    .char-card {
+      width: 100px !important;
+      height: 110px !important;
+      min-width: 100px !important;
+      min-height: 110px !important;
+      background: #2c2c2c;
+      border: 2px solid #5a5a5a;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      user-select: none;
+      transition: 0.1s linear;
+      overflow: hidden;
+      flex-shrink: 0 !important;
+      backdrop-filter: blur(0px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .char-card:active {
+      cursor: grabbing;
+      transform: scale(1.02);
+    }
+
+    .char-card:hover {
+      border-color: #ffcc00;
+      background: #3a3a3a;
+    }
+
+    /* 图片区域 — 锁死尺寸，且截图时使用canvas模拟object-fit:cover */
+    .char-card img {
+      width: 68px !important;
+      height: 68px !important;
+      min-width: 68px !important;
+      min-height: 68px !important;
+      object-fit: cover;
+      border-radius: 8px;
+      display: block;
+      flex-shrink: 0;
+      background: #1e1e1e;
+    }
+
+    .char-name {
+      font-size: 12px;
+      margin-top: 6px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 92px;
+      text-align: center;
+      color: #f0f0f0;
+    }
+
+    .tip {
+      text-align: center;
+      margin-top: 20px;
+      color: #aaa;
+      font-size: 13px;
+      border-top: 1px solid #2c2c2c;
+      padding-top: 16px;
+    }
+
+    /* 手机端精细适配 */
+    @media (max-width: 768px) {
+      body { padding: 12px; }
+      .pool { gap: 8px; padding: 10px; min-height: 110px; }
+      .tier-row { min-height: 92px; border-radius: 10px; }
+      .tier-label { width: 55px; font-size: 18px; }
+      .tier-content { padding: 8px; gap: 6px; min-height: 92px; }
+      .char-card {
+        width: 72px !important;
+        height: 82px !important;
+        min-width: 72px !important;
+        min-height: 82px !important;
+        border-radius: 8px;
+      }
+      .char-card img {
+        width: 48px !important;
+        height: 48px !important;
+        min-width: 48px !important;
+        min-height: 48px !important;
+        border-radius: 6px;
+      }
+      .char-name { font-size: 10px; margin-top: 4px; max-width: 68px; }
+      .title { font-size: 22px; }
+      #screenshotBtn { padding: 6px 18px; font-size: 14px; }
+    }
+
+    /* 加载提示浮层 */
+    .loading-toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #000000cc;
+      backdrop-filter: blur(8px);
+      color: #ffcc66;
+      padding: 8px 20px;
+      border-radius: 40px;
+      font-size: 14px;
+      z-index: 9999;
+      pointer-events: none;
+      font-weight: bold;
+      border: 1px solid #ffcc66;
+    }
+  </style>
+</head>
+<body>
+  <div class="title-box">
+    <div class="title">🎖️ 角色梯度排行工具</div>
+    <button id="screenshotBtn">📸 截图保存梯度榜</button>
+  </div>
+
+  <div class="container">
+    <div class="pool" id="pool"></div>
+    <div class="tier-list" id="captureArea">
+      <div class="tier-row"><div class="tier-label t0">T0</div><div class="tier-content"></div></div>
+      <div class="tier-row"><div class="tier-label t1">T1</div><div class="tier-content"></div></div>
+      <div class="tier-row"><div class="tier-label t2">T2</div><div class="tier-content"></div></div>
+      <div class="tier-row"><div class="tier-label t3">T3</div><div class="tier-content"></div></div>
+      <div class="tier-row"><div class="tier-label t4">T4</div><div class="tier-content"></div></div>
+      <div class="tier-row"><div class="tier-label trash">💀 下水道</div><div class="tier-content"></div></div>
+    </div>
+    <div class="tip">
+      ✨ 拖动角色卡片到对应梯度 | 点击截图按钮保存完整榜单 ✨<br>
+      📢 by：铃兰之剑 - 爱与和平公会 | 公会收人联系方式V: KZFVIP<br><br><br>
+    </div>
+  </div>
+
+  <script>
+    if (typeof html2canvas === 'undefined') {
+      alert("❌ 截图库加载失败！请检查网络后刷新页面");
+      document.getElementById('screenshotBtn').disabled = true;
+    }
+
+    // ---------- 角色数据 ----------
+    const imageFiles = [
+      "001.png","002.png","003.png","004.png","005.png","006.png","007.png","008.png","009.png","010.png",
+      "011.png","012.png","013.png","014.png","015.png","016.png","017.png","018.png","019.png","020.png",
+      "021.png","022.png","023.png","024.png","025.png","026.png","027.png","028.png","029.png","030.png",
+      "031.png","032.png","033.png","034.png","035.png","036.png","037.png","038.png","039.png","040.png",
+      "041.png","042.png","043.png","044.png","045.png","046.png","047.png","048.png","049.png","050.png",
+      "051.png","052.png","053.png","054.png","055.png","056.png","057.png","058.png","059.png","060.png",
+      "061.png","062.png","063.png","064.png","065.png","066.png","067.png","068.png","069.png","070.png",
+      "071.png","072.png","073.png","074.png","075.png","076.png","077.png","078.png","079.png","080.png","081.png"
+    ];
+
+    const characterNames = [
+      "麦莎","拉维耶","法卡尔","贝拉","歌洛莉亚","泰登","伊南娜","迪塔利奥","马格努斯","泽维尔",
+      "米格尔","科尔","萨曼莎","列奥尼德","嘉西娅","古兹曼","莉莉薇儿","诺诺薇儿","伊奇","内尔伽勒",
+      "伦伽勒","艾达","茉茉","阿列克谢","席梦娜","索菲亚","奥古斯特","蔻蔻娜","阿坎贝","哈斯娜",
+      "霍玛","卡丽丝","夏可露露","阿加塔","塔埃尔","拉维耶·初夏记忆","帕米娜","翠斯坦","莉拉","索菲亚·夏日约定",
+      "奇亚","柯瓦雷","露维塔","伊斯特拉","芙拉维娅","流星队","鲁特菲","爱莎","阿芙拉","伊南娜·铃兰之剑",
+      "妮蒂娅","森西","玛露西尔","法琳","黎各","柯莱丹萨","帕西法尔","萨曼莎·不灭微光","伊瑟琳德","全装甲麦莎",
+      "卡姆洛特","法卡尔·卫国之箭","伦伽勒·传承之枪","露卡玛尔","波奇茸茸","沙姆斯","克拉拉","赛琳娜","叶迦内","赫砂",
+      "沙娜姿","基安希尔","希里","杰洛特","叶奈法","特莉丝","安娜","阿列克谢·风雪孤行","罗格妮达","乌莉娅","伊凡"
+    ];
+
+    // ----- 构建池子 -----
+    const pool = document.getElementById("pool");
+
+    function createCharacterCard(imgSrc, name, index) {
+      const card = document.createElement("div");
+      card.className = "char-card";
+      card.setAttribute("data-name", name);
+      card.draggable = true;
+      
+      const img = document.createElement("img");
+      img.src = imgSrc;
+      img.alt = name;
+      img.setAttribute("crossorigin", "anonymous"); // 本地同源无关但安全
+      
+      // 图片加载失败时的后备占位符（不影响拖拽）
+      img.onerror = function() {
+        this.style.display = 'none';
+        const fallback = document.createElement('div');
+        fallback.style.cssText = `width:68px;height:68px;background:#3a3a3a;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:12px;`;
+        fallback.textContent = '🖼️';
+        card.insertBefore(fallback, this);
+        // 同时记录加载失败标记，便于预加载时跳过
+        card.setAttribute('data-img-error', 'true');
+      };
+      
+      const nameEl = document.createElement("div");
+      nameEl.className = "char-name";
+      nameEl.textContent = name;
+      
+      card.appendChild(img);
+      card.appendChild(nameEl);
+      return card;
+    }
+
+    // 生成所有角色卡
+    imageFiles.forEach((file, idx) => {
+      const card = createCharacterCard(`./assets/${file}`, characterNames[idx], idx);
+      pool.appendChild(card);
+    });
+
+    // ---------- 拖拽逻辑 (原生 + 触摸优化) ----------
+    let draggingCard = null;
+
+    document.addEventListener("dragstart", (e) => {
+      const card = e.target.closest(".char-card");
+      if (!card) return;
+      draggingCard = card;
+      setTimeout(() => { if (card) card.style.opacity = "0.5"; }, 0);
+      e.dataTransfer.effectAllowed = "move";
+    });
+    
+    document.addEventListener("dragend", (e) => {
+      if (draggingCard) {
+        draggingCard.style.opacity = "1";
+        draggingCard = null;
+      }
+    });
+    
+    document.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      if (!draggingCard) return;
+      const targetCard = e.target.closest(".char-card");
+      const container = e.target.closest(".pool, .tier-content");
+      if (!container) return;
+      if (!targetCard) {
+        container.appendChild(draggingCard);
+        return;
+      }
+      const rect = targetCard.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const isRightHalf = mouseX > rect.width / 2;
+      if (isRightHalf) {
+        container.insertBefore(draggingCard, targetCard.nextElementSibling);
+      } else {
+        container.insertBefore(draggingCard, targetCard);
+      }
+    });
+    
+    document.addEventListener("drop", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    // 触摸拖拽 (移动端)
+    function initTouchDrag() {
+      const cards = document.querySelectorAll('.char-card');
+      cards.forEach(card => {
+        let touchStartX = 0, touchStartY = 0;
+        card.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+          card.style.opacity = "0.6";
+          draggingCard = card;
+        }, { passive: false });
+        
+        card.addEventListener('touchmove', (e) => {
+          e.preventDefault();
+          if (!draggingCard) return;
+          const touchX = e.touches[0].clientX;
+          const touchY = e.touches[0].clientY;
+          const targetEl = document.elementFromPoint(touchX, touchY);
+          const container = targetEl?.closest(".pool, .tier-content");
+          const targetCard = targetEl?.closest(".char-card");
+          if (container) {
+            if (!targetCard) {
+              container.appendChild(draggingCard);
+            } else {
+              const rect = targetCard.getBoundingClientRect();
+              const isRight = (touchX - rect.left) > (rect.width / 2);
+              if (isRight) {
+                container.insertBefore(draggingCard, targetCard.nextElementSibling);
+              } else {
+                container.insertBefore(draggingCard, targetCard);
+              }
+            }
+          }
+        }, { passive: false });
+        
+        card.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          if (draggingCard) {
+            draggingCard.style.opacity = "1";
+            draggingCard = null;
+          }
+        });
+      });
+    }
+    
+    // 因为卡片可能会移动，每次截图前确保触摸事件重新绑定（动态监听全局委托也可）
+    document.body.addEventListener('touchstart', (e) => {
+      if (!e.target.closest('.char-card')) return;
+      // 已经在卡片上单独处理过，但确保全局不冲突
+    });
+    initTouchDrag();
+    
+    // ---------- 🔥 核心修复：解决截图 object-fit 导致图片压扁 ----------
+    // 预加载所有真实图片，获取自然宽高 + 当前显示尺寸（用于模拟 object-fit:cover）
+    async function preloadImagesAndGetNaturalSize() {
+      const allCards = Array.from(document.querySelectorAll('.char-card'));
+      const imgDataMap = new Map(); // key: img.src  value: { naturalW, naturalH, displayW, displayH }
+      const imgPromises = [];
+      
+      for (let card of allCards) {
+        const img = card.querySelector('img');
+        if (!img || img.complete === false) {
+          // 如果图片尚未加载则等待
+          if (img && !img.complete) {
+            const promise = new Promise((resolve) => {
+              img.onload = () => resolve();
+              img.onerror = () => resolve(); // 错误也继续
+              if (img.complete) resolve();
+            });
+            imgPromises.push(promise);
+          }
+        }
+      }
+      // 等待所有图片加载（至少尝试）
+      await Promise.allSettled(imgPromises);
+      // 再等待一帧确保尺寸稳定
+      await new Promise(r => setTimeout(r, 50));
+      
+      // 收集所有图片的自然宽高和当前渲染尺寸
+      for (let card of allCards) {
+        const img = card.querySelector('img');
+        if (!img || card.hasAttribute('data-img-error')) continue;
+        // 获取最终显示宽高（CSS渲染尺寸）
+        const rect = img.getBoundingClientRect();
+        const displayW = rect.width;
+        const displayH = rect.height;
+        const naturalW = img.naturalWidth || displayW;
+        const naturalH = img.naturalHeight || displayH;
+        if (naturalW > 0 && naturalH > 0 && displayW > 0 && displayH > 0) {
+          imgDataMap.set(img.src, {
+            naturalW, naturalH,
+            displayW, displayH
+          });
+        } else {
+          // 备用近似值
+          imgDataMap.set(img.src, {
+            naturalW: 100, naturalH: 100,
+            displayW: displayW || 68, displayH: displayH || 68
+          });
+        }
+      }
+      return imgDataMap;
+    }
+    
+    // 对克隆文档中的图片执行 "object-fit: cover" 模拟 (canvas 绘制保持比例)
+    function fixObjectFitInClone(cloneDoc, imgDataMap) {
+      const cloneImgs = cloneDoc.querySelectorAll('.char-card img');
+      cloneImgs.forEach(img => {
+        const src = img.src;
+        // 获取原始图片数据
+        const sizeInfo = imgDataMap.get(src);
+        if (!sizeInfo) return;
+        
+        const { naturalW, naturalH, displayW, displayH } = sizeInfo;
+        if (naturalW <= 0 || naturalH <= 0) return;
+        
+        // 获取最终需要绘制的尺寸 (基于clone后样式)
+        let targetW = displayW, targetH = displayH;
+        // 确保宽高有效（防止克隆后尺寸0）
+        if (targetW <= 2) targetW = img.clientWidth || 68;
+        if (targetH <= 2) targetH = img.clientHeight || 68;
+        
+        // 模拟 cover 效果: 计算缩放比
+        const scaleW = targetW / naturalW;
+        const scaleH = targetH / naturalH;
+        const scale = Math.max(scaleW, scaleH);
+        const drawW = naturalW * scale;
+        const drawH = naturalH * scale;
+        const offsetX = (targetW - drawW) / 2;
+        const offsetY = (targetH - drawH) / 2;
+        
+        // 创建 canvas 绘制完美比例图片
+        const canvas = document.createElement('canvas');
+        canvas.width = targetW;
+        canvas.height = targetH;
+        const ctx = canvas.getContext('2d');
+        try {
+          // 创建临时图片元素重新绘制（使用原src保证清晰）
+          const tempImg = new Image();
+          tempImg.crossOrigin = "Anonymous";
+          tempImg.src = src;
+          // 注意: 同步绘制会有风险，但由于图片已经预加载完成且同源，基本可以同步绘制
+          // 为了保证万无一失，使用同步绘制，但需要确保图片loaded？实际上大部分情况已经缓存
+          if (tempImg.complete && tempImg.naturalWidth > 0) {
+            ctx.drawImage(tempImg, offsetX, offsetY, drawW, drawH);
+            const dataURL = canvas.toDataURL('image/png');
+            img.src = dataURL;
+          } else {
+            // 极少数未命中缓存：异步但会丢失截图? 使用onload确保替换但截图会遗漏，改用回退直接设置样式避免拉伸
+            tempImg.onload = () => {
+              ctx.drawImage(tempImg, offsetX, offsetY, drawW, drawH);
+              img.src = canvas.toDataURL('image/png');
+            };
+            // 超时回退: 保持原图但去掉object-fit影响，直接设置图片宽高不拉伸?(但总比压扁好)
+            setTimeout(() => {
+              if (img.src === src) {
+                img.style.objectFit = 'fill'; // 保底避免大面积空白
+              }
+            }, 100);
+          }
+        } catch (err) {
+          console.warn("canvas绘制失败", err);
+        }
+        
+        // 移除原本可能干扰的样式，并固定尺寸
+        img.style.objectFit = 'fill';  // 替换后为canvas完美比例，无需cover
+        img.style.width = targetW + 'px';
+        img.style.height = targetH + 'px';
+      });
+    }
+    
+    // 全局等待所有图片加载完毕 (显示加载提示)
+    let loadingToast = null;
+    function showMessage(msg, isError = false) {
+      if (loadingToast) loadingToast.remove();
+      const div = document.createElement('div');
+      div.className = 'loading-toast';
+      div.innerText = msg;
+      div.style.background = isError ? '#cc3333dd' : '#1e1e1edd';
+      document.body.appendChild(div);
+      setTimeout(() => div.remove(), 2000);
+    }
+    
+    // 截图主函数
+    async function takeScreenshot() {
+      if (typeof html2canvas === 'undefined') {
+        alert("截图库缺失，请刷新页面重试");
+        return;
+      }
+      
+      showMessage("📸 准备截图，加载图片资源...");
+      // 1. 预加载并收集所有图片真实比例信息
+      let imgDataMap;
+      try {
+        imgDataMap = await preloadImagesAndGetNaturalSize();
+      } catch (err) {
+        console.warn(err);
+        imgDataMap = new Map();
+      }
+      
+      const captureArea = document.getElementById("captureArea");
+      if (!captureArea) return;
+      
+      showMessage("✨ 生成梯度榜截图，请稍后...");
+      
+      // 添加微延迟确保布局稳定
+      await new Promise(r => setTimeout(r, 80));
+      
+      try {
+        // 使用 html2canvas 并传入 onclone 回调修复 object-fit
+        const canvas = await html2canvas(captureArea, {
+          backgroundColor: "#2a2a2a",
+          logging: false,
+          allowTaint: false,
+          useCORS: true,        // 本地图片同源，无影响
+          scale: window.devicePixelRatio || 2,  // 提高截图清晰度但不会压扁，因为我们修复比例
+          windowWidth: captureArea.scrollWidth,
+          windowHeight: captureArea.scrollHeight,
+          onclone: (clonedDoc, element) => {
+            // 关键修复：在克隆文档中完美模拟 object-fit:cover，杜绝压扁
+            if (imgDataMap.size > 0) {
+              fixObjectFitInClone(clonedDoc, imgDataMap);
+            } else {
+              // 降级处理：强制设置图片宽高不变形但保持比例? 备用方案
+              const cloneImgs = clonedDoc.querySelectorAll('.char-card img');
+              cloneImgs.forEach(img => {
+                const w = img.getAttribute('width') || img.clientWidth || 68;
+                const h = img.getAttribute('height') || img.clientHeight || 68;
+                img.style.objectFit = 'contain';
+                img.style.width = w + 'px';
+                img.style.height = h + 'px';
+              });
+            }
+          }
+        });
+        
+        // 导出图片
+        const link = document.createElement("a");
+        const timestamp = new Date().getTime();
+        link.download = `梯度排行_${timestamp}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        showMessage("✅ 截图保存成功！图库或下载目录查看");
+      } catch (error) {
+        console.error("截图失败", error);
+        showMessage("❌ 截图失败，请刷新重试或检查网络", true);
+      }
+    }
+    
+    // 绑定截图按钮
+    const screenshotBtn = document.getElementById("screenshotBtn");
+    screenshotBtn.addEventListener("click", () => {
+      takeScreenshot().catch(e => {
+        console.error(e);
+        alert("截图异常，可刷新页面后再试");
+      });
+    });
+    
+    // 当角色因拖拽移动后，重新确保触摸代理 (动态重新绑定新卡片触摸)
+    function rebindTouchForNewCards() {
+      // 使用事件委托避免性能损耗，但其实初始化已经覆盖，移动后原卡片依然有监听，但新生成的不会有, 但我们没生成新卡片
+      // 拖拽只是移动位置，卡片监听依然保留，无需额外操作。
+    }
+    const observer = new MutationObserver(() => {});
+    observer.observe(document.body, { childList: false, subtree: false });
+    
+    // 增加防意外: 确保截图按钮时没有任何卡片处于半透明状态
+    window.addEventListener('dragend', () => {
+      if (draggingCard) draggingCard.style.opacity = "1";
+    });
+  </script>
+</body>
+</html>
