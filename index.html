@@ -516,69 +516,81 @@
     }
     initTouchDrag();
 
-    // ========== 截图修复：解决图片变形 ==========
-    async function preloadImagesInfo() {
-      const allCards = Array.from(document.querySelectorAll('.char-card'));
-      const imgDataMap = new Map();
-      for (let card of allCards) {
-        const img = card.querySelector('img');
-        if (!img || !img.src || img.naturalWidth === 0) continue;
-        const rect = img.getBoundingClientRect();
-        const displayW = rect.width;
-        const displayH = rect.height;
-        const naturalW = img.naturalWidth;
-        const naturalH = img.naturalHeight;
-        if (naturalW > 0 && naturalH > 0 && displayW > 0 && displayH > 0) {
-          imgDataMap.set(img.src, { naturalW, naturalH, displayW, displayH });
-        }
-      }
-      return imgDataMap;
+    // ========== 彻底解决截图图片变形 ==========
+    // 等待所有图片加载完成
+    async function waitAllImages() {
+      const images = Array.from(document.querySelectorAll('.char-card img'));
+      const promises = images.map(img => {
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        return new Promise((resolve) => {
+          img.onload = resolve;
+          img.onerror = resolve;
+          if (img.complete) resolve();
+        });
+      });
+      await Promise.all(promises);
     }
 
-    function fixImagesInClone(cloneDoc, imgDataMap) {
-      const cloneImgs = cloneDoc.querySelectorAll('.char-card img');
-      cloneImgs.forEach(img => {
-        const src = img.src;
-        const info = imgDataMap.get(src);
-        if (!info) return;
-        const { naturalW, naturalH, displayW, displayH } = info;
-        if (naturalW <= 0 || naturalH <= 0) return;
+    // 克隆并修复图片（使用 canvas 重新绘制，保证 object-fit:cover 效果）
+    async function getFixedClone(element) {
+      // 深克隆整个区域
+      const clone = element.cloneNode(true);
+      // 获取原始所有卡片图片的位置和尺寸信息
+      const originalImages = Array.from(element.querySelectorAll('.char-card img'));
+      const cloneImages = Array.from(clone.querySelectorAll('.char-card img'));
+      
+      // 收集每张图片的原始显示尺寸和自然尺寸
+      const imgDataList = [];
+      for (let i = 0; i < originalImages.length; i++) {
+        const origImg = originalImages[i];
+        const rect = origImg.getBoundingClientRect();
+        const displayW = rect.width;
+        const displayH = rect.height;
+        const naturalW = origImg.naturalWidth;
+        const naturalH = origImg.naturalHeight;
+        imgDataList.push({ displayW, displayH, naturalW, naturalH, src: origImg.src });
+      }
+      
+      // 为每个克隆图片创建 canvas 重新绘制
+      for (let i = 0; i < cloneImages.length; i++) {
+        const cloneImg = cloneImages[i];
+        const data = imgDataList[i];
+        if (!data || data.naturalW <= 0 || data.naturalH <= 0) continue;
         
-        const targetW = displayW;
-        const targetH = displayH;
-        const scaleW = targetW / naturalW;
-        const scaleH = targetH / naturalH;
+        const { displayW, displayH, naturalW, naturalH, src } = data;
+        // 计算 cover 方式的绘制参数
+        const scaleW = displayW / naturalW;
+        const scaleH = displayH / naturalH;
         const scale = Math.max(scaleW, scaleH);
         const drawW = naturalW * scale;
         const drawH = naturalH * scale;
-        const offsetX = (targetW - drawW) / 2;
-        const offsetY = (targetH - drawH) / 2;
+        const offsetX = (displayW - drawW) / 2;
+        const offsetY = (displayH - drawH) / 2;
         
         const canvas = document.createElement('canvas');
-        canvas.width = targetW;
-        canvas.height = targetH;
+        canvas.width = displayW;
+        canvas.height = displayH;
         const ctx = canvas.getContext('2d');
-        try {
+        
+        await new Promise((resolve) => {
           const tempImg = new Image();
           tempImg.crossOrigin = "Anonymous";
-          tempImg.src = src;
-          if (tempImg.complete && tempImg.naturalWidth > 0) {
+          tempImg.onload = () => {
             ctx.drawImage(tempImg, offsetX, offsetY, drawW, drawH);
-            img.src = canvas.toDataURL('image/png');
-          } else {
-            tempImg.onload = () => {
-              ctx.drawImage(tempImg, offsetX, offsetY, drawW, drawH);
-              img.src = canvas.toDataURL('image/png');
-            };
-          }
-        } catch(e) { console.warn(e); }
-        img.style.objectFit = 'fill';
-        img.style.width = targetW + 'px';
-        img.style.height = targetH + 'px';
-      });
+            cloneImg.src = canvas.toDataURL('image/png');
+            resolve();
+          };
+          tempImg.onerror = () => resolve();
+          tempImg.src = src;
+        });
+        // 确保图片填满容器
+        cloneImg.style.objectFit = 'fill';
+        cloneImg.style.width = displayW + 'px';
+        cloneImg.style.height = displayH + 'px';
+      }
+      return clone;
     }
 
-    // 截图主函数（带变形修复）
     async function takeScreenshot() {
       if (typeof html2canvas === 'undefined') {
         alert("截图库未加载，请刷新页面");
@@ -593,22 +605,29 @@
       document.body.appendChild(toast);
       
       try {
-        // 预加载所有图片的真实尺寸信息
-        const imgDataMap = await preloadImagesInfo();
-        const canvas = await html2canvas(captureArea, {
+        // 等待所有原始图片加载完毕
+        await waitAllImages();
+        // 获取修复后的克隆体
+        const fixedClone = await getFixedClone(captureArea);
+        // 将克隆体临时添加到 body（隐藏位置）
+        fixedClone.style.position = 'absolute';
+        fixedClone.style.top = '-9999px';
+        fixedClone.style.left = '-9999px';
+        document.body.appendChild(fixedClone);
+        
+        // 截图克隆体
+        const canvas = await html2canvas(fixedClone, {
           backgroundColor: "#2a2a2a",
           logging: false,
           allowTaint: false,
           useCORS: true,
           scale: window.devicePixelRatio || 2,
-          windowWidth: captureArea.scrollWidth,
-          windowHeight: captureArea.scrollHeight,
-          onclone: (clonedDoc, element) => {
-            if (imgDataMap.size > 0) {
-              fixImagesInClone(clonedDoc, imgDataMap);
-            }
-          }
+          windowWidth: fixedClone.scrollWidth,
+          windowHeight: fixedClone.scrollHeight
         });
+        // 移除克隆体
+        document.body.removeChild(fixedClone);
+        
         const imgData = canvas.toDataURL("image/png");
         showPreviewModal(imgData);
       } catch (err) {
@@ -652,7 +671,7 @@
       takeScreenshot();
     });
     
-    console.log("梯度工具已加载 | 截图变形已修复 | 提示已更新");
+    console.log("梯度工具已加载 | 截图变形已彻底修复（克隆+canvas重绘）");
   </script>
 </body>
 </html>
