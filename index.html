@@ -516,7 +516,69 @@
     }
     initTouchDrag();
 
-    // 截图功能（预览 + 长按保存）
+    // ========== 截图修复：解决图片变形 ==========
+    async function preloadImagesInfo() {
+      const allCards = Array.from(document.querySelectorAll('.char-card'));
+      const imgDataMap = new Map();
+      for (let card of allCards) {
+        const img = card.querySelector('img');
+        if (!img || !img.src || img.naturalWidth === 0) continue;
+        const rect = img.getBoundingClientRect();
+        const displayW = rect.width;
+        const displayH = rect.height;
+        const naturalW = img.naturalWidth;
+        const naturalH = img.naturalHeight;
+        if (naturalW > 0 && naturalH > 0 && displayW > 0 && displayH > 0) {
+          imgDataMap.set(img.src, { naturalW, naturalH, displayW, displayH });
+        }
+      }
+      return imgDataMap;
+    }
+
+    function fixImagesInClone(cloneDoc, imgDataMap) {
+      const cloneImgs = cloneDoc.querySelectorAll('.char-card img');
+      cloneImgs.forEach(img => {
+        const src = img.src;
+        const info = imgDataMap.get(src);
+        if (!info) return;
+        const { naturalW, naturalH, displayW, displayH } = info;
+        if (naturalW <= 0 || naturalH <= 0) return;
+        
+        const targetW = displayW;
+        const targetH = displayH;
+        const scaleW = targetW / naturalW;
+        const scaleH = targetH / naturalH;
+        const scale = Math.max(scaleW, scaleH);
+        const drawW = naturalW * scale;
+        const drawH = naturalH * scale;
+        const offsetX = (targetW - drawW) / 2;
+        const offsetY = (targetH - drawH) / 2;
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = targetW;
+        canvas.height = targetH;
+        const ctx = canvas.getContext('2d');
+        try {
+          const tempImg = new Image();
+          tempImg.crossOrigin = "Anonymous";
+          tempImg.src = src;
+          if (tempImg.complete && tempImg.naturalWidth > 0) {
+            ctx.drawImage(tempImg, offsetX, offsetY, drawW, drawH);
+            img.src = canvas.toDataURL('image/png');
+          } else {
+            tempImg.onload = () => {
+              ctx.drawImage(tempImg, offsetX, offsetY, drawW, drawH);
+              img.src = canvas.toDataURL('image/png');
+            };
+          }
+        } catch(e) { console.warn(e); }
+        img.style.objectFit = 'fill';
+        img.style.width = targetW + 'px';
+        img.style.height = targetH + 'px';
+      });
+    }
+
+    // 截图主函数（带变形修复）
     async function takeScreenshot() {
       if (typeof html2canvas === 'undefined') {
         alert("截图库未加载，请刷新页面");
@@ -531,6 +593,8 @@
       document.body.appendChild(toast);
       
       try {
+        // 预加载所有图片的真实尺寸信息
+        const imgDataMap = await preloadImagesInfo();
         const canvas = await html2canvas(captureArea, {
           backgroundColor: "#2a2a2a",
           logging: false,
@@ -538,7 +602,12 @@
           useCORS: true,
           scale: window.devicePixelRatio || 2,
           windowWidth: captureArea.scrollWidth,
-          windowHeight: captureArea.scrollHeight
+          windowHeight: captureArea.scrollHeight,
+          onclone: (clonedDoc, element) => {
+            if (imgDataMap.size > 0) {
+              fixImagesInClone(clonedDoc, imgDataMap);
+            }
+          }
         });
         const imgData = canvas.toDataURL("image/png");
         showPreviewModal(imgData);
@@ -565,7 +634,7 @@
       
       const tip = document.createElement('div');
       tip.className = 'preview-tip';
-      tip.textContent = '📸 长按图片保存到相册';
+      tip.textContent = '📸 长按图片保存到相册（电脑：右键→另存为）';
       
       const closeBtn = document.createElement('button');
       closeBtn.className = 'close-preview';
@@ -583,7 +652,7 @@
       takeScreenshot();
     });
     
-    console.log("梯度工具已加载 | PC大尺寸 + 手机紧凑 + 自动滚动");
+    console.log("梯度工具已加载 | 截图变形已修复 | 提示已更新");
   </script>
 </body>
 </html>
