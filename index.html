@@ -14,39 +14,10 @@
     }
 
     body {
-      background: #121212;
-      color: #fff;
+      background: radial-gradient(circle at 10% 20%, #2a0a4a, #0f0a1f);
+      min-height: 100vh;
       padding: 20px;
-    }
-
-    .title-box {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .title {
-      font-size: 26px;
-      color: #ffcc00;
-      margin-bottom: 10px;
-      font-weight: bold;
-    }
-
-    #screenshotBtn {
-      padding: 8px 20px;
-      background: #ff3333;
       color: #fff;
-      border: none;
-      border-radius: 40px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.2s;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    }
-
-    #screenshotBtn:hover {
-      background: #ff6666;
-      transform: scale(1.02);
     }
 
     .container {
@@ -54,16 +25,33 @@
       margin: 0 auto;
     }
 
+    .title-box {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    .title {
+      font-size: 32px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #EE9BFF, #AF86FF, #843FFF);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 15px rgba(175,134,255,0.5);
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+
     .pool {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      background: #1e1e1e;
+      background: rgba(30, 20, 45, 0.6);
+      backdrop-filter: blur(8px);
       padding: 15px;
       border-radius: 8px;
       margin-bottom: 20px;
       min-height: 150px;
-      border: 1px solid #333;
+      border: 1px solid rgba(175,134,255,0.4);
     }
 
     .tier-list {
@@ -75,16 +63,18 @@
     .tier-row {
       display: flex;
       align-items: stretch;
-      background: #222;
-      border-radius: 12px;
+      background: rgba(20, 15, 35, 0.6);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
       overflow: hidden;
-      min-height: 130px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      border: 1px solid rgba(175,134,255,0.4);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     }
 
     .tier-label {
       width: 80px;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       font-size: 24px;
@@ -93,16 +83,25 @@
       flex-shrink: 0;
       text-shadow: 0 1px 2px black;
       text-align: center;
-      flex-direction: column;
-      line-height: 1.2;
+      background: #5D1FDD;
+      cursor: pointer;
+      transition: 0.1s;
+      padding: 12px 0;
+      gap: 6px;
     }
-
-    .tier-label.t0 { background: #ff3333; }
-    .tier-label.t1 { background: #ff7722; }
-    .tier-label.t2 { background: #ffcc00; color:#1e1e1e; }
-    .tier-label.t3 { background: #33bb55; }
-    .tier-label.t4 { background: #4488ff; }
-    .tier-label.trash { background: #777; }
+    .tier-label .label-text {
+      font-size: 20px;
+    }
+    .tier-label .gear-icon {
+      font-size: 14px;
+      opacity: 0.7;
+      background: rgba(0,0,0,0.3);
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+    .tier-label:hover .gear-icon {
+      opacity: 1;
+    }
 
     .tier-content {
       flex: 1;
@@ -111,64 +110,134 @@
       flex-wrap: wrap;
       gap: 10px;
       align-items: center;
-      background: #2a2a2a;
+      background: rgba(30, 20, 45, 0.5);
       min-height: 130px;
     }
 
-    /* 电脑端默认大尺寸卡片 */
     .char-card {
       width: 100px !important;
       height: 110px !important;
       min-width: 100px !important;
       min-height: 110px !important;
-      background: #2c2c2c;
-      border: 2px solid #5a5a5a;
-      border-radius: 10px;
+      background: rgba(45, 35, 65, 0.8);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(175,134,255,0.6);
+      border-radius: 16px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       cursor: grab;
       user-select: none;
-      transition: 0.1s;
+      transition: 0.15s;
       overflow: hidden;
       flex-shrink: 0 !important;
       touch-action: pan-y;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
-
     .char-card:active {
       cursor: grabbing;
-      transform: scale(0.98);
+      transform: scale(0.97);
     }
-
     .char-card:hover {
-      border-color: #ffcc00;
-      background: #3a3a3a;
+      border-color: #EE9BFF;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 18px rgba(175,134,255,0.4);
     }
-
     .char-card img {
       width: 65px !important;
       height: 65px !important;
       min-width: 65px !important;
       min-height: 65px !important;
       object-fit: cover;
-      border-radius: 8px;
+      border-radius: 12px;
       display: block;
       flex-shrink: 0;
-      background: #1e1e1e;
+      background: #1e1a2f;
+      border: 1px solid #AF86FF;
     }
-
     .char-name {
       font-size: 12px;
-      margin-top: 6px;
+      margin-top: 8px;
       font-weight: 500;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       max-width: 90px;
       text-align: center;
-      color: #f0f0f0;
+      color: #f0eaff;
+    }
+
+    /* 加号按钮 - 若隐若现 */
+    .add-card-btn {
+      width: 100px !important;
+      height: 110px !important;
+      min-width: 100px !important;
+      min-height: 110px !important;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(4px);
+      border: 1px dashed rgba(175, 134, 255, 0.5);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: bold;
+      color: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .add-card-btn:hover,
+    .add-card-btn:active {
+      background: rgba(175, 134, 255, 0.4);
+      border: 1px solid #EE9BFF;
+      box-shadow: 0 0 12px #AF86FF;
+      transform: scale(1.02);
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .pool-section {
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+    .pool-title {
+      font-size: 18px;
+      margin-bottom: 12px;
+      color: #EE9BFF;
+      letter-spacing: 2px;
+    }
+
+    /* 按钮区域 */
+    .action-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    .action-btn {
+      padding: 10px 28px;
+      border: none;
+      border-radius: 60px;
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+      background: linear-gradient(135deg, #843FFF, #5D1FDD);
+      box-shadow: 0 4px 15px rgba(93,31,221,0.5);
+    }
+    .action-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 20px rgba(175,134,255,0.7);
+    }
+    .reset-btn {
+      background: linear-gradient(135deg, #555, #333);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    .reset-btn:hover {
+      background: linear-gradient(135deg, #777, #444);
     }
 
     .tip {
@@ -176,12 +245,199 @@
       margin-top: 20px;
       color: #aaa;
       font-size: 13px;
-      border-top: 1px solid #2c2c2c;
+      border-top: 1px solid rgba(175,134,255,0.3);
       padding-top: 16px;
       margin-bottom: 30px;
     }
 
-    /* 截图预览浮层 */
+    /* 多选角色选择器 */
+    .picker-modal {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(20, 15, 35, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 30px 30px 0 0;
+      padding: 20px;
+      z-index: 10000;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      max-height: 70vh;
+      overflow-y: auto;
+      border-top: 2px solid #AF86FF;
+    }
+    .picker-modal.open {
+      transform: translateY(0);
+    }
+    .picker-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #EE9BFF;
+    }
+    .picker-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 28px;
+      cursor: pointer;
+    }
+    .picker-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .picker-card {
+      width: 80px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 12px;
+      padding: 8px;
+      text-align: center;
+      cursor: pointer;
+      border: 1px solid #843FFF;
+      position: relative;
+    }
+    .picker-card.selected {
+      background: rgba(175,134,255,0.5);
+      border: 2px solid #EE9BFF;
+    }
+    .picker-card img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .picker-card span {
+      display: block;
+      font-size: 10px;
+      margin-top: 4px;
+    }
+    .picker-checkbox {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 20px;
+      height: 20px;
+      background: rgba(0,0,0,0.6);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+      pointer-events: none;
+    }
+    .picker-card.selected .picker-checkbox::after {
+      content: "✓";
+    }
+    .picker-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 10px;
+      padding-bottom: 10px;
+    }
+    .picker-actions button {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 40px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .picker-confirm {
+      background: #843FFF;
+      color: white;
+    }
+    .picker-cancel {
+      background: #555;
+      color: white;
+    }
+
+    .settings-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1e1a2f;
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 24px;
+      z-index: 10001;
+      width: 300px;
+      text-align: center;
+      border: 1px solid #AF86FF;
+      box-shadow: 0 20px 30px rgba(0,0,0,0.5);
+    }
+    .settings-modal input {
+      width: 100%;
+      padding: 10px;
+      margin: 15px 0;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid #AF86FF;
+      border-radius: 40px;
+      color: white;
+      text-align: center;
+      font-size: 16px;
+    }
+    .color-palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin: 15px 0;
+    }
+    .color-option {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid rgba(255,255,255,0.5);
+      transition: 0.1s;
+    }
+    .color-option:hover {
+      transform: scale(1.1);
+      border-color: white;
+    }
+    .settings-btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 40px;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .settings-cancel {
+      background: #555;
+    }
+    .settings-apply {
+      background: #843FFF;
+    }
+
+    @media (max-width: 768px) {
+      body { padding: 12px; }
+      .title { font-size: 22px; }
+      .pool { gap: 6px; padding: 8px; }
+      .tier-row { min-height: 75px; }
+      .tier-label { width: 55px; font-size: 14px; }
+      .tier-label .label-text { font-size: 12px; }
+      .tier-content { padding: 6px; gap: 6px; }
+      .char-card, .add-card-btn { width: 70px !important; height: 80px !important; }
+      .char-card img { width: 48px !important; height: 48px !important; }
+      .char-name { font-size: 9px; max-width: 65px; }
+      .add-card-btn { font-size: 36px; }
+      .tip { font-size: 10px; }
+      .action-btn { padding: 6px 16px; font-size: 14px; }
+      .picker-card { width: 70px; }
+      .picker-card img { width: 45px; height: 45px; }
+    }
+
     .preview-modal {
       position: fixed;
       top: 0;
@@ -193,485 +449,451 @@
       justify-content: center;
       align-items: center;
       z-index: 9999;
-      touch-action: none;
     }
     .preview-container {
       max-width: 90%;
       max-height: 80%;
       background: #fff;
-      border-radius: 16px;
+      border-radius: 24px;
       padding: 16px;
       text-align: center;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
-    .preview-img {
-      max-width: 100%;
-      max-height: 55vh;
-      border-radius: 8px;
-      display: block;
-      margin: 0 auto;
-    }
-    .preview-tip {
-      margin-top: 12px;
-      color: #333;
-      font-size: 13px;
-      font-weight: 500;
-    }
-    .close-preview {
-      margin-top: 16px;
-      padding: 6px 20px;
-      background: #ff3333;
-      color: #fff;
-      border: none;
-      border-radius: 30px;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    /* 手机端紧凑样式 */
-    @media (max-width: 768px) {
-      body {
-        padding: 12px;
-      }
-      .title {
-        font-size: 20px;
-        margin-bottom: 8px;
-      }
-      #screenshotBtn {
-        padding: 6px 16px;
-        font-size: 13px;
-      }
-      .pool {
-        gap: 6px;
-        padding: 8px;
-        margin-bottom: 16px;
-        min-height: 100px;
-      }
-      .tier-list {
-        gap: 8px;
-      }
-      .tier-row {
-        min-height: 75px;
-        border-radius: 10px;
-      }
-      .tier-label {
-        width: 48px;
-        font-size: 14px;
-      }
-      .tier-content {
-        padding: 6px;
-        gap: 5px;
-        min-height: 75px;
-      }
-      .char-card {
-        width: 60px !important;
-        height: 70px !important;
-        min-width: 60px !important;
-        min-height: 70px !important;
-        border-width: 1.5px;
-      }
-      .char-card img {
-        width: 42px !important;
-        height: 42px !important;
-        min-width: 42px !important;
-        min-height: 42px !important;
-      }
-      .char-name {
-        font-size: 9px;
-        margin-top: 3px;
-        max-width: 54px;
-      }
-      .tip {
-        font-size: 10px;
-        margin-top: 12px;
-        padding-top: 10px;
-        margin-bottom: 20px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .char-card {
-        width: 55px !important;
-        height: 65px !important;
-      }
-      .char-card img {
-        width: 38px !important;
-        height: 38px !important;
-      }
-      .char-name {
-        font-size: 8px;
-        max-width: 50px;
-      }
-      .tier-label {
-        width: 42px;
-        font-size: 12px;
-      }
-    }
+    .preview-img { max-width: 100%; max-height: 55vh; border-radius: 12px; }
+    .preview-tip { margin-top: 12px; color: #333; font-size: 13px; }
+    .close-preview { margin-top: 16px; padding: 6px 20px; background: #843FFF; color: white; border: none; border-radius: 30px; cursor: pointer; }
   </style>
 </head>
 <body>
+<div class="container">
   <div class="title-box">
-    <div class="title">🎖️ 角色梯度排行工具</div>
-    <button id="screenshotBtn">📸 截图保存梯度榜</button>
+    <div class="title">铃兰之剑角色梯度榜</div>
   </div>
 
-  <div class="container">
+  <div class="tier-list" id="captureArea">
+    <div class="tier-row" data-tier="0">
+      <div class="tier-label" style="background:#ff3333;"><span class="label-text">T0</span><span class="gear-icon">⚙</span></div>
+      <div class="tier-content"></div>
+    </div>
+    <div class="tier-row" data-tier="1">
+      <div class="tier-label" style="background:#ff7722;"><span class="label-text">T1</span><span class="gear-icon">⚙</span></div>
+      <div class="tier-content"></div>
+    </div>
+    <div class="tier-row" data-tier="2">
+      <div class="tier-label" style="background:#ffcc00; color:#1e1e1e;"><span class="label-text">T2</span><span class="gear-icon">⚙</span></div>
+      <div class="tier-content"></div>
+    </div>
+    <div class="tier-row" data-tier="3">
+      <div class="tier-label" style="background:#33bb55;"><span class="label-text">T3</span><span class="gear-icon">⚙</span></div>
+      <div class="tier-content"></div>
+    </div>
+    <div class="tier-row" data-tier="4">
+      <div class="tier-label" style="background:#4488ff;"><span class="label-text">T4</span><span class="gear-icon">⚙</span></div>
+      <div class="tier-content"></div>
+    </div>
+    <div class="tier-row" data-tier="trash">
+      <div class="tier-label" style="background:#777;"><span class="label-text">💀下水道</span><span class="gear-icon">⚙</span></div>
+      <div class="tier-content"></div>
+    </div>
+  </div>
+
+  <div class="pool-section">
+    <div class="pool-title">⭐ 等待编队的角色 ⭐</div>
     <div class="pool" id="pool"></div>
-    <div class="tier-list" id="captureArea">
-      <div class="tier-row"><div class="tier-label t0">T0</div><div class="tier-content"></div></div>
-      <div class="tier-row"><div class="tier-label t1">T1</div><div class="tier-content"></div></div>
-      <div class="tier-row"><div class="tier-label t2">T2</div><div class="tier-content"></div></div>
-      <div class="tier-row"><div class="tier-label t3">T3</div><div class="tier-content"></div></div>
-      <div class="tier-row"><div class="tier-label t4">T4</div><div class="tier-content"></div></div>
-      <div class="tier-row"><div class="tier-label trash">💀<br>下水道</div><div class="tier-content"></div></div>
-    </div>
-    <div class="tip">
-      📢 by：铃兰之剑 - 爱与和平公会 | 公会收人联系方式V: KZFVIP
-    </div>
   </div>
 
-  <script>
-    if (typeof html2canvas === 'undefined') {
-      alert("❌ 截图库加载失败，请刷新页面");
-      document.getElementById('screenshotBtn').disabled = true;
-    }
+  <div class="action-buttons">
+    <button id="screenshotBtn" class="action-btn">📸 截图保存梯度榜</button>
+    <button id="resetBtn" class="action-btn reset-btn">🔄 重置排行榜</button>
+  </div>
 
-    // ---------- 角色数据 ----------
-    const imageFiles = [
-      "001.png","002.png","003.png","004.png","005.png","006.png","007.png","008.png","009.png","010.png",
-      "011.png","012.png","013.png","014.png","015.png","016.png","017.png","018.png","019.png","020.png",
-      "021.png","022.png","023.png","024.png","025.png","026.png","027.png","028.png","029.png","030.png",
-      "031.png","032.png","033.png","034.png","035.png","036.png","037.png","038.png","039.png","040.png",
-      "041.png","042.png","043.png","044.png","045.png","046.png","047.png","048.png","049.png","050.png",
-      "051.png","052.png","053.png","054.png","055.png","056.png","057.png","058.png","059.png","060.png",
-      "061.png","062.png","063.png","064.png","065.png","066.png","067.png","068.png","069.png","070.png",
-      "071.png","072.png","073.png","074.png","075.png","076.png","077.png","078.png","079.png","080.png","081.png",
-      "082.png"
-    ];
+  <div class="tip">
+    📢 by：铃兰之剑 - 爱与和平公会 | 公会收人联系方式V: KZFVIP
+  </div>
+</div>
 
-    const characterNames = [
-      "麦莎","拉维耶","法卡尔","贝拉","歌洛莉亚","泰登","伊南娜","迪塔利奥","马格努斯","泽维尔",
-      "米格尔","科尔","萨曼莎","列奥尼德","嘉西娅","古兹曼","莉莉薇儿","诺诺薇儿","伊奇","内尔伽勒",
-      "伦伽勒","艾达","茉茉","阿列克谢","席梦娜","索菲亚","奥古斯特","蔻蔻娜","阿坎贝","哈斯娜",
-      "霍玛","卡丽丝","夏可露露","阿加塔","塔埃尔","拉维耶·初夏记忆","帕米娜","翠斯坦","莉拉","索菲亚·夏日约定",
-      "奇亚","柯瓦雷","露维塔","伊斯特拉","芙拉维娅","流星队","鲁特菲","爱莎","阿芙拉","伊南娜·铃兰之剑",
-      "妮蒂娅","森西","玛露西尔","法琳","黎各","柯莱丹萨","帕西法尔","萨曼莎·不灭微光","伊瑟琳德","全装甲麦莎",
-      "卡姆洛特","法卡尔·卫国之箭","伦伽勒·传承之枪","露卡玛尔","波奇茸茸","沙姆斯","克拉拉","赛琳娜","叶迦内","赫砂",
-      "沙娜姿","基安希尔","希里","杰洛特","叶奈法","特莉丝","安娜","阿列克谢·风雪孤行","罗格妮达","乌莉娅","伊凡",
-      "芬恩"
-    ];
+<script>
+  if (typeof html2canvas === 'undefined') alert("截图库加载失败，请刷新页面");
 
-    const pool = document.getElementById("pool");
+  // ---------- 角色数据 ----------
+  const imageFiles = [
+    "001.png","002.png","003.png","004.png","005.png","006.png","007.png","008.png","009.png","010.png",
+    "011.png","012.png","013.png","014.png","015.png","016.png","017.png","018.png","019.png","020.png",
+    "021.png","022.png","023.png","024.png","025.png","026.png","027.png","028.png","029.png","030.png",
+    "031.png","032.png","033.png","034.png","035.png","036.png","037.png","038.png","039.png","040.png",
+    "041.png","042.png","043.png","044.png","045.png","046.png","047.png","048.png","049.png","050.png",
+    "051.png","052.png","053.png","054.png","055.png","056.png","057.png","058.png","059.png","060.png",
+    "061.png","062.png","063.png","064.png","065.png","066.png","067.png","068.png","069.png","070.png",
+    "071.png","072.png","073.png","074.png","075.png","076.png","077.png","078.png","079.png","080.png","081.png","082.png"
+  ];
+  const characterNames = [
+    "麦莎","拉维耶","法卡尔","贝拉","歌洛莉亚","泰登","伊南娜","迪塔利奥","马格努斯","泽维尔",
+    "米格尔","科尔","萨曼莎","列奥尼德","嘉西娅","古兹曼","莉莉薇儿","诺诺薇儿","伊奇","内尔伽勒",
+    "伦伽勒","艾达","茉茉","阿列克谢","席梦娜","索菲亚","奥古斯特","蔻蔻娜","阿坎贝","哈斯娜",
+    "霍玛","卡丽丝","夏可露露","阿加塔","塔埃尔","拉维耶·初夏记忆","帕米娜","翠斯坦","莉拉","索菲亚·夏日约定",
+    "奇亚","柯瓦雷","露维塔","伊斯特拉","芙拉维娅","流星队","鲁特菲","爱莎","阿芙拉","伊南娜·铃兰之剑",
+    "妮蒂娅","森西","玛露西尔","法琳","黎各","柯莱丹萨","帕西法尔","萨曼莎·不灭微光","伊瑟琳德","全装甲麦莎",
+    "卡姆洛特","法卡尔·卫国之箭","伦伽勒·传承之枪","露卡玛尔","波奇茸茸","沙姆斯","克拉拉","赛琳娜","叶迦内","赫砂",
+    "沙娜姿","基安希尔","希里","杰洛特","叶奈法","特莉丝","安娜","阿列克谢·风雪孤行","罗格妮达","乌莉娅","伊凡","芬恩"
+  ];
 
-    function createCharacterCard(imgSrc, name) {
-      const card = document.createElement("div");
-      card.className = "char-card";
-      card.setAttribute("data-name", name);
-      card.draggable = true;
-      
-      const img = document.createElement("img");
-      img.src = imgSrc;
-      img.alt = name;
-      img.onerror = function() {
-        this.style.display = 'none';
-        const fallback = document.createElement('div');
-        fallback.style.cssText = `width:65px;height:65px;background:#3a3a3a;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:12px;`;
-        fallback.textContent = '🖼️';
-        card.insertBefore(fallback, this);
-      };
-      const nameEl = document.createElement("div");
-      nameEl.className = "char-name";
-      nameEl.textContent = name;
-      card.appendChild(img);
-      card.appendChild(nameEl);
-      return card;
-    }
+  const poolContainer = document.getElementById("pool");
+  function createCharacterCard(imgSrc, name) {
+    const card = document.createElement("div");
+    card.className = "char-card";
+    card.setAttribute("data-name", name);
+    card.draggable = true;
+    const img = document.createElement("img");
+    img.src = imgSrc;
+    img.alt = name;
+    img.onerror = function() { this.style.display = 'none'; };
+    const nameEl = document.createElement("div");
+    nameEl.className = "char-name";
+    nameEl.textContent = name;
+    card.appendChild(img);
+    card.appendChild(nameEl);
+    return card;
+  }
 
-    imageFiles.forEach((file, idx) => {
-      const card = createCharacterCard(`./assets/${file}`, characterNames[idx]);
-      pool.appendChild(card);
-    });
+  imageFiles.forEach((file, idx) => {
+    const card = createCharacterCard(`./assets/${file}`, characterNames[idx]);
+    poolContainer.appendChild(card);
+  });
 
-    // 拖拽变量
-    let draggingCard = null;
+  // 拖拽逻辑
+  let draggingCard = null;
+  document.addEventListener("dragstart", (e) => {
+    const card = e.target.closest(".char-card");
+    if (!card) return;
+    draggingCard = card;
+    setTimeout(() => card.style.opacity = "0.5", 0);
+    e.dataTransfer.effectAllowed = "move";
+  });
+  document.addEventListener("dragend", (e) => {
+    if (draggingCard) { draggingCard.style.opacity = "1"; draggingCard = null; }
+    ensurePlusAtEnd();
+  });
+  document.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    if (!draggingCard) return;
+    const targetCard = e.target.closest(".char-card");
+    const container = e.target.closest(".pool, .tier-content");
+    if (!container) return;
+    if (!targetCard) { container.appendChild(draggingCard); ensurePlusAtEnd(); return; }
+    const rect = targetCard.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const isRightHalf = mouseX > rect.width / 2;
+    if (isRightHalf) container.insertBefore(draggingCard, targetCard.nextElementSibling);
+    else container.insertBefore(draggingCard, targetCard);
+    ensurePlusAtEnd();
+  });
+  document.addEventListener("drop", (e) => { e.preventDefault(); e.stopPropagation(); });
 
-    // 鼠标拖拽
-    document.addEventListener("dragstart", (e) => {
-      const card = e.target.closest(".char-card");
-      if (!card) return;
-      draggingCard = card;
-      setTimeout(() => { if (card) card.style.opacity = "0.5"; }, 0);
-      e.dataTransfer.effectAllowed = "move";
-    });
-    document.addEventListener("dragend", (e) => {
-      if (draggingCard) {
-        draggingCard.style.opacity = "1";
-        draggingCard = null;
-      }
-    });
-    document.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      if (!draggingCard) return;
-      const targetCard = e.target.closest(".char-card");
-      const container = e.target.closest(".pool, .tier-content");
-      if (!container) return;
-      if (!targetCard) {
-        container.appendChild(draggingCard);
-        return;
-      }
-      const rect = targetCard.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const isRightHalf = mouseX > rect.width / 2;
-      if (isRightHalf) {
-        container.insertBefore(draggingCard, targetCard.nextElementSibling);
-      } else {
-        container.insertBefore(draggingCard, targetCard);
-      }
-    });
-    document.addEventListener("drop", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-    });
-
-    // 手机触摸拖拽 + 自动滚动
-    let scrollInterval = null;
-    function stopAutoScroll() {
-      if (scrollInterval) {
-        clearInterval(scrollInterval);
-        scrollInterval = null;
-      }
-    }
-    function startAutoScroll(direction) {
-      if (scrollInterval) stopAutoScroll();
-      scrollInterval = setInterval(() => {
-        if (!draggingCard) {
-          stopAutoScroll();
+  let scrollInterval = null;
+  function stopAutoScroll() { if (scrollInterval) { clearInterval(scrollInterval); scrollInterval = null; } }
+  function startAutoScroll(direction) {
+    if (scrollInterval) stopAutoScroll();
+    scrollInterval = setInterval(() => {
+      if (!draggingCard) { stopAutoScroll(); return; }
+      window.scrollBy(0, direction * 14);
+    }, 16);
+  }
+  function initTouchDrag() {
+    document.querySelectorAll('.char-card').forEach(card => {
+      card.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        card.style.opacity = "0.6";
+        draggingCard = card;
+      }, { passive: false });
+      card.addEventListener('touchmove', (e) => {
+        if (!draggingCard) return;
+        const touch = e.touches[0];
+        const clientY = touch.clientY;
+        const threshold = 75;
+        let speed = 0;
+        if (clientY < threshold) speed = -Math.min(18, (threshold - clientY) / 3);
+        else if (clientY > window.innerHeight - threshold) speed = Math.min(18, (clientY - (window.innerHeight - threshold)) / 3);
+        if (speed !== 0) {
+          if (!scrollInterval) startAutoScroll(speed > 0 ? 1 : -1);
+          e.preventDefault();
           return;
+        } else stopAutoScroll();
+        const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+        const container = targetEl?.closest(".pool, .tier-content");
+        const targetCard = targetEl?.closest(".char-card");
+        if (container) {
+          if (!targetCard) container.appendChild(draggingCard);
+          else {
+            const rect = targetCard.getBoundingClientRect();
+            const isRightHalf = (touch.clientX - rect.left) > (rect.width / 2);
+            if (isRightHalf) container.insertBefore(draggingCard, targetCard.nextElementSibling);
+            else container.insertBefore(draggingCard, targetCard);
+          }
+          ensurePlusAtEnd();
         }
-        const speed = 14;
-        window.scrollBy(0, direction * speed);
-      }, 16);
-    }
-
-    function initTouchDrag() {
-      const cards = document.querySelectorAll('.char-card');
-      cards.forEach(card => {
-        let touchStartX = 0, touchStartY = 0;
-        card.addEventListener('touchstart', (e) => {
-          e.preventDefault();
-          touchStartX = e.touches[0].clientX;
-          touchStartY = e.touches[0].clientY;
-          card.style.opacity = "0.6";
-          draggingCard = card;
-        }, { passive: false });
-        
-        card.addEventListener('touchmove', (e) => {
-          if (!draggingCard) return;
-          const touch = e.touches[0];
-          const clientY = touch.clientY;
-          const threshold = 75;
-          let speed = 0;
-          
-          if (clientY < threshold) {
-            speed = -Math.min(18, (threshold - clientY) / 3);
-          } else if (clientY > window.innerHeight - threshold) {
-            speed = Math.min(18, (clientY - (window.innerHeight - threshold)) / 3);
-          }
-          
-          if (speed !== 0) {
-            if (!scrollInterval) startAutoScroll(speed > 0 ? 1 : -1);
-            e.preventDefault();
-            return;
-          } else {
-            stopAutoScroll();
-          }
-          
-          const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
-          const container = targetEl?.closest(".pool, .tier-content");
-          const targetCard = targetEl?.closest(".char-card");
-          if (container) {
-            if (!targetCard) {
-              container.appendChild(draggingCard);
-            } else {
-              const rect = targetCard.getBoundingClientRect();
-              const isRightHalf = (touch.clientX - rect.left) > (rect.width / 2);
-              if (isRightHalf) {
-                container.insertBefore(draggingCard, targetCard.nextElementSibling);
-              } else {
-                container.insertBefore(draggingCard, targetCard);
-              }
-            }
-          }
-        }, { passive: false });
-        
-        card.addEventListener('touchend', (e) => {
-          e.preventDefault();
-          if (draggingCard) {
-            draggingCard.style.opacity = "1";
-            draggingCard = null;
-          }
-          stopAutoScroll();
-        });
+      }, { passive: false });
+      card.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        if (draggingCard) { draggingCard.style.opacity = "1"; draggingCard = null; }
+        stopAutoScroll();
+        ensurePlusAtEnd();
       });
-    }
-    initTouchDrag();
+    });
+  }
+  initTouchDrag();
 
-    // ========== 彻底解决截图图片变形 ==========
-    // 等待所有图片加载完成
-    async function waitAllImages() {
-      const images = Array.from(document.querySelectorAll('.char-card img'));
-      const promises = images.map(img => {
-        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-        return new Promise((resolve) => {
-          img.onload = resolve;
-          img.onerror = resolve;
-          if (img.complete) resolve();
-        });
-      });
-      await Promise.all(promises);
-    }
+  function ensurePlusAtEnd() {
+    const tierContents = document.querySelectorAll('.tier-content');
+    tierContents.forEach(container => {
+      const plusBtn = container.querySelector('.add-card-btn');
+      if (plusBtn) container.appendChild(plusBtn);
+    });
+  }
 
-    // 克隆并修复图片（使用 canvas 重新绘制，保证 object-fit:cover 效果）
-    async function getFixedClone(element) {
-      // 深克隆整个区域
-      const clone = element.cloneNode(true);
-      // 获取原始所有卡片图片的位置和尺寸信息
-      const originalImages = Array.from(element.querySelectorAll('.char-card img'));
-      const cloneImages = Array.from(clone.querySelectorAll('.char-card img'));
-      
-      // 收集每张图片的原始显示尺寸和自然尺寸
-      const imgDataList = [];
-      for (let i = 0; i < originalImages.length; i++) {
-        const origImg = originalImages[i];
-        const rect = origImg.getBoundingClientRect();
-        const displayW = rect.width;
-        const displayH = rect.height;
-        const naturalW = origImg.naturalWidth;
-        const naturalH = origImg.naturalHeight;
-        imgDataList.push({ displayW, displayH, naturalW, naturalH, src: origImg.src });
-      }
-      
-      // 为每个克隆图片创建 canvas 重新绘制
-      for (let i = 0; i < cloneImages.length; i++) {
-        const cloneImg = cloneImages[i];
-        const data = imgDataList[i];
-        if (!data || data.naturalW <= 0 || data.naturalH <= 0) continue;
-        
-        const { displayW, displayH, naturalW, naturalH, src } = data;
-        // 计算 cover 方式的绘制参数
-        const scaleW = displayW / naturalW;
-        const scaleH = displayH / naturalH;
-        const scale = Math.max(scaleW, scaleH);
-        const drawW = naturalW * scale;
-        const drawH = naturalH * scale;
-        const offsetX = (displayW - drawW) / 2;
-        const offsetY = (displayH - drawH) / 2;
-        
-        const canvas = document.createElement('canvas');
-        canvas.width = displayW;
-        canvas.height = displayH;
-        const ctx = canvas.getContext('2d');
-        
-        await new Promise((resolve) => {
-          const tempImg = new Image();
-          tempImg.crossOrigin = "Anonymous";
-          tempImg.onload = () => {
-            ctx.drawImage(tempImg, offsetX, offsetY, drawW, drawH);
-            cloneImg.src = canvas.toDataURL('image/png');
-            resolve();
-          };
-          tempImg.onerror = () => resolve();
-          tempImg.src = src;
-        });
-        // 确保图片填满容器
-        cloneImg.style.objectFit = 'fill';
-        cloneImg.style.width = displayW + 'px';
-        cloneImg.style.height = displayH + 'px';
-      }
-      return clone;
-    }
-
-    async function takeScreenshot() {
-      if (typeof html2canvas === 'undefined') {
-        alert("截图库未加载，请刷新页面");
-        return;
-      }
-      const captureArea = document.getElementById("captureArea");
-      if (!captureArea) return;
-      
-      const toast = document.createElement('div');
-      toast.textContent = '📸 生成截图中...';
-      toast.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#000000cc; color:#ffcc66; padding:6px 16px; border-radius:30px; font-size:12px; z-index:10000;';
-      document.body.appendChild(toast);
-      
-      try {
-        // 等待所有原始图片加载完毕
-        await waitAllImages();
-        // 获取修复后的克隆体
-        const fixedClone = await getFixedClone(captureArea);
-        // 将克隆体临时添加到 body（隐藏位置）
-        fixedClone.style.position = 'absolute';
-        fixedClone.style.top = '-9999px';
-        fixedClone.style.left = '-9999px';
-        document.body.appendChild(fixedClone);
-        
-        // 截图克隆体
-        const canvas = await html2canvas(fixedClone, {
-          backgroundColor: "#2a2a2a",
-          logging: false,
-          allowTaint: false,
-          useCORS: true,
-          scale: window.devicePixelRatio || 2,
-          windowWidth: fixedClone.scrollWidth,
-          windowHeight: fixedClone.scrollHeight
-        });
-        // 移除克隆体
-        document.body.removeChild(fixedClone);
-        
-        const imgData = canvas.toDataURL("image/png");
-        showPreviewModal(imgData);
-      } catch (err) {
-        console.error(err);
-        alert("截图失败，请重试");
-      } finally {
-        toast.remove();
-      }
-    }
-    
-    function showPreviewModal(imgData) {
-      const existing = document.querySelector('.preview-modal');
+  function updatePlusButtons() {
+    const tierContents = document.querySelectorAll('.tier-content');
+    tierContents.forEach(container => {
+      const existing = container.querySelector('.add-card-btn');
       if (existing) existing.remove();
-      
-      const modal = document.createElement('div');
-      modal.className = 'preview-modal';
-      const container = document.createElement('div');
-      container.className = 'preview-container';
-      
-      const img = document.createElement('img');
-      img.src = imgData;
-      img.className = 'preview-img';
-      
-      const tip = document.createElement('div');
-      tip.className = 'preview-tip';
-      tip.textContent = '📸 长按图片保存到相册（电脑：右键→另存为）';
-      
-      const closeBtn = document.createElement('button');
-      closeBtn.className = 'close-preview';
-      closeBtn.textContent = '关闭';
-      closeBtn.onclick = () => modal.remove();
-      
-      container.appendChild(img);
-      container.appendChild(tip);
-      container.appendChild(closeBtn);
-      modal.appendChild(container);
+      const plusBtn = document.createElement('div');
+      plusBtn.className = 'add-card-btn';
+      plusBtn.textContent = '+';
+      plusBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openRolePicker(container);
+      });
+      container.appendChild(plusBtn);
+    });
+  }
+
+  // 多选角色选择器
+  let currentPickerTarget = null;
+  let selectedCardsSet = new Set();
+
+  function openRolePicker(targetContainer) {
+    currentPickerTarget = targetContainer;
+    const poolCards = Array.from(document.querySelectorAll('#pool .char-card'));
+    if (poolCards.length === 0) {
+      alert("角色池已空，没有更多角色可添加");
+      return;
+    }
+    selectedCardsSet.clear();
+    let modal = document.querySelector('.picker-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.className = 'picker-modal';
       document.body.appendChild(modal);
     }
-    
-    document.getElementById("screenshotBtn").addEventListener("click", () => {
-      takeScreenshot();
+    modal.innerHTML = `
+      <div class="picker-header">
+        <span>✨ 选择要加入的角色（可多选） ✨</span>
+        <button class="picker-close">×</button>
+      </div>
+      <div class="picker-grid"></div>
+      <div class="picker-actions">
+        <button class="picker-confirm">✓ 确定添加</button>
+        <button class="picker-cancel">✗ 取消</button>
+      </div>
+    `;
+    const grid = modal.querySelector('.picker-grid');
+    poolCards.forEach(card => {
+      const imgSrc = card.querySelector('img')?.src || '';
+      const name = card.querySelector('.char-name')?.textContent || '';
+      const pickerItem = document.createElement('div');
+      pickerItem.className = 'picker-card';
+      pickerItem.innerHTML = `
+        <img src="${imgSrc}" onerror="this.style.display='none'">
+        <span>${name}</span>
+        <div class="picker-checkbox"></div>
+      `;
+      pickerItem.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (selectedCardsSet.has(card)) {
+          selectedCardsSet.delete(card);
+          pickerItem.classList.remove('selected');
+        } else {
+          selectedCardsSet.add(card);
+          pickerItem.classList.add('selected');
+        }
+      });
+      grid.appendChild(pickerItem);
     });
-    
-    console.log("梯度工具已加载 | 截图变形已彻底修复（克隆+canvas重绘）");
-  </script>
+    modal.classList.add('open');
+    modal.querySelector('.picker-close').addEventListener('click', closePicker);
+    modal.querySelector('.picker-cancel').addEventListener('click', closePicker);
+    modal.querySelector('.picker-confirm').addEventListener('click', () => {
+      if (selectedCardsSet.size === 0) {
+        alert("请至少选择一个角色");
+        return;
+      }
+      selectedCardsSet.forEach(card => {
+        if (card.parentNode) {
+          currentPickerTarget.appendChild(card);
+        }
+      });
+      ensurePlusAtEnd();
+      closePicker();
+    });
+    function closePicker() {
+      modal.classList.remove('open');
+      currentPickerTarget = null;
+      selectedCardsSet.clear();
+    }
+  }
+
+  // 梯度自定义设置
+  function initTierSettings() {
+    const gearIcons = document.querySelectorAll('.tier-label .gear-icon');
+    const presetColors = ["#ff3333","#ff7722","#ffcc00","#33bb55","#4488ff","#5D1FDD","#843FFF","#EE9BFF","#f97316","#ec489a","#8b5cf6","#6b7280"];
+    gearIcons.forEach(gear => {
+      gear.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const labelDiv = gear.closest('.tier-label');
+        const labelTextSpan = labelDiv.querySelector('.label-text');
+        const currentText = labelTextSpan.textContent;
+        let settingsModal = document.querySelector('.settings-modal');
+        if (settingsModal) settingsModal.remove();
+        settingsModal = document.createElement('div');
+        settingsModal.className = 'settings-modal';
+        settingsModal.innerHTML = `<h3 style="margin-bottom:10px;">⚙ 梯度设置</h3><input type="text" id="tierNameInput" value="${currentText.replace(/&/g, '&amp;')}"><div class="color-palette"></div><div style="display:flex; gap:12px; justify-content:center; margin-top:16px;"><button class="settings-cancel settings-btn">取消</button><button class="settings-apply settings-btn">应用</button></div>`;
+        const paletteDiv = settingsModal.querySelector('.color-palette');
+        presetColors.forEach(color => {
+          const colorCircle = document.createElement('div');
+          colorCircle.className = 'color-option';
+          colorCircle.style.backgroundColor = color;
+          colorCircle.addEventListener('click', () => {
+            labelDiv.style.backgroundColor = color;
+            if (color === "#ffcc00") labelDiv.style.color = "#1e1e1e";
+            else labelDiv.style.color = "white";
+          });
+          paletteDiv.appendChild(colorCircle);
+        });
+        document.body.appendChild(settingsModal);
+        const input = settingsModal.querySelector('#tierNameInput');
+        const applyBtn = settingsModal.querySelector('.settings-apply');
+        const cancelBtn = settingsModal.querySelector('.settings-cancel');
+        applyBtn.onclick = () => { const newName = input.value.trim(); if (newName) labelTextSpan.textContent = newName; settingsModal.remove(); };
+        cancelBtn.onclick = () => { settingsModal.remove(); };
+      });
+    });
+  }
+
+  // 重置排行榜：将所有角色移回角色池
+  function resetRanking() {
+    if (confirm("确定重置排行榜吗？所有角色将回到角色池，梯度的自定义名称和颜色会保留。")) {
+      const allTierContents = document.querySelectorAll('.tier-content');
+      const pool = document.getElementById('pool');
+      allTierContents.forEach(container => {
+        // 获取容器内所有角色卡片（排除加号按钮）
+        const cards = Array.from(container.querySelectorAll('.char-card'));
+        cards.forEach(card => {
+          pool.appendChild(card);
+        });
+      });
+      // 确保加号按钮回到末尾（因为移动卡片后加号可能在中间，需重新调整）
+      ensurePlusAtEnd();
+    }
+  }
+
+  // ---------- 截图修复 ----------
+  async function waitAllImages() {
+    const images = Array.from(document.querySelectorAll('.char-card img'));
+    await Promise.all(images.map(img => {
+      if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+      return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
+    }));
+  }
+
+  async function getFixedClone(element) {
+    const clone = element.cloneNode(true);
+    clone.querySelectorAll('.gear-icon').forEach(el => el.remove());
+    clone.querySelectorAll('.add-card-btn').forEach(el => el.remove());
+    const cards = clone.querySelectorAll('.char-card');
+    cards.forEach(card => {
+      card.style.background = '#2c2c2c';
+      card.style.backdropFilter = 'none';
+      card.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+      const img = card.querySelector('img');
+      if (img) img.style.border = '1px solid #AF86FF';
+    });
+    const originalImages = Array.from(element.querySelectorAll('.char-card img'));
+    const cloneImages = Array.from(clone.querySelectorAll('.char-card img'));
+    const imgDataList = [];
+    for (let i = 0; i < originalImages.length; i++) {
+      const origImg = originalImages[i];
+      const rect = origImg.getBoundingClientRect();
+      imgDataList.push({
+        displayW: rect.width, displayH: rect.height,
+        naturalW: origImg.naturalWidth, naturalH: origImg.naturalHeight,
+        src: origImg.src
+      });
+    }
+    for (let i = 0; i < cloneImages.length; i++) {
+      const cloneImg = cloneImages[i];
+      const data = imgDataList[i];
+      if (!data || data.naturalW <= 0) continue;
+      const { displayW, displayH, naturalW, naturalH, src } = data;
+      const scale = Math.max(displayW / naturalW, displayH / naturalH);
+      const drawW = naturalW * scale, drawH = naturalH * scale;
+      const offsetX = (displayW - drawW) / 2, offsetY = (displayH - drawH) / 2;
+      const canvas = document.createElement('canvas');
+      canvas.width = displayW; canvas.height = displayH;
+      const ctx = canvas.getContext('2d');
+      await new Promise(resolve => {
+        const tempImg = new Image();
+        tempImg.crossOrigin = "Anonymous";
+        tempImg.onload = () => { ctx.drawImage(tempImg, offsetX, offsetY, drawW, drawH); cloneImg.src = canvas.toDataURL(); resolve(); };
+        tempImg.onerror = resolve;
+        tempImg.src = src;
+      });
+      cloneImg.style.objectFit = 'fill';
+      cloneImg.style.width = displayW + 'px';
+      cloneImg.style.height = displayH + 'px';
+    }
+    return clone;
+  }
+
+  async function takeScreenshot() {
+    if (typeof html2canvas === 'undefined') { alert("截图库未加载"); return; }
+    const captureArea = document.getElementById("captureArea");
+    if (!captureArea) return;
+    const toast = document.createElement('div');
+    toast.textContent = '📸 生成截图中...';
+    toast.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#000000cc; color:#ffcc66; padding:6px 16px; border-radius:30px; font-size:12px; z-index:10000;';
+    document.body.appendChild(toast);
+    try {
+      await waitAllImages();
+      const fixedClone = await getFixedClone(captureArea);
+      fixedClone.style.position = 'absolute';
+      fixedClone.style.top = '-9999px';
+      fixedClone.style.left = '-9999px';
+      document.body.appendChild(fixedClone);
+      const canvas = await html2canvas(fixedClone, {
+        backgroundColor: "#1e1a2f",
+        scale: window.devicePixelRatio || 2,
+        useCORS: true,
+        logging: false
+      });
+      document.body.removeChild(fixedClone);
+      const imgData = canvas.toDataURL("image/png");
+      showPreviewModal(imgData);
+    } catch (err) { console.error(err); alert("截图失败"); } finally { toast.remove(); }
+  }
+  function showPreviewModal(imgData) {
+    let modal = document.querySelector('.preview-modal');
+    if (modal) modal.remove();
+    modal = document.createElement('div'); modal.className = 'preview-modal';
+    modal.innerHTML = `<div class="preview-container"><img class="preview-img" src="${imgData}"><div class="preview-tip">📸 长按图片保存到相册（电脑：右键→另存为）</div><button class="close-preview">关闭</button></div>`;
+    document.body.appendChild(modal);
+    modal.querySelector('.close-preview').onclick = () => modal.remove();
+  }
+
+  function init() {
+    updatePlusButtons();
+    initTierSettings();
+    document.getElementById("screenshotBtn").addEventListener("click", takeScreenshot);
+    document.getElementById("resetBtn").addEventListener("click", resetRanking);
+  }
+  init();
+</script>
 </body>
 </html>
