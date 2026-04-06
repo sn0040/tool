@@ -418,7 +418,7 @@
       font-size: 12px;
     }
     .row-btn:hover { background: #843FFF; }
-    /* 手机端紧凑 UI（增强版，确保生效） */
+    /* 手机端紧凑 UI */
     @media (max-width: 768px) {
       body { padding: 8px; }
       .title { font-size: 20px; }
@@ -443,41 +443,56 @@
       .tip { font-size: 10px; }
       .pool { gap: 6px; padding: 8px; }
     }
-    /* 截图预览浮层 */
+    /* 截图预览浮层（全屏双指缩放专用） */
     .preview-modal {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.9);
+      background: rgba(0,0,0,0.95);
       display: flex;
       justify-content: center;
       align-items: center;
       z-index: 9999;
-      flex-direction: column;
     }
     .preview-container {
-      max-width: 90%;
-      max-height: 90%;
-      background: transparent;
-      border-radius: 24px;
-      padding: 16px;
-      text-align: center;
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      justify-content: center;
+      position: relative;
+    }
+    .preview-img-wrapper {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+      touch-action: pinch-zoom;
     }
     .preview-img {
-      max-width: 100%;
-      max-height: 100%;
+      transform-origin: center;
+      max-width: 90%;
+      max-height: 90%;
       object-fit: contain;
+      transition: transform 0.05s linear;
       cursor: pointer;
-      transition: 0.2s;
     }
-    .preview-tip { color: white; font-size: 14px; }
-    .preview-buttons { display: flex; gap: 16px; }
+    .preview-tip {
+      color: white;
+      font-size: 14px;
+      margin: 12px 0;
+      text-align: center;
+    }
+    .preview-buttons {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
     .preview-btn {
       padding: 8px 20px;
       background: #843FFF;
@@ -736,7 +751,7 @@
     });
     function closePicker() { modal.classList.remove('open'); currentPickerTarget = null; selectedCardsSet.clear(); }
   }
-  // 拖拽（鼠标+触摸）
+  // 拖拽（鼠标+触摸） 修复 isDragging 重置时机
   document.addEventListener("dragstart", (e) => {
     const card = e.target.closest(".char-card");
     if (!card) return;
@@ -747,7 +762,7 @@
   });
   document.addEventListener("dragend", (e) => {
     if (draggingCard) { draggingCard.style.opacity = "1"; draggingCard = null; }
-    isDragging = false;
+    setTimeout(() => { isDragging = false; }, 10);
     ensurePlusAtEnd();
   });
   document.addEventListener("dragover", (e) => {
@@ -765,6 +780,7 @@
     ensurePlusAtEnd();
   });
   document.addEventListener("drop", (e) => { e.preventDefault(); e.stopPropagation(); });
+
   let scrollInterval = null;
   function stopAutoScroll() { if (scrollInterval) { clearInterval(scrollInterval); scrollInterval = null; } }
   function startAutoScroll(direction) {
@@ -812,14 +828,15 @@
       card.addEventListener('touchend', (e) => {
         e.preventDefault();
         if (draggingCard) { draggingCard.style.opacity = "1"; draggingCard = null; }
-        isDragging = false;
+        setTimeout(() => { isDragging = false; }, 10);
         stopAutoScroll();
         ensurePlusAtEnd();
       });
     });
   }
   initTouchDrag();
-  // 单击移回气泡
+
+  // 单击移回气泡（修复：确保 isDragging 重置后触发）
   document.body.addEventListener('click', (e) => {
     const card = e.target.closest('.char-card');
     if (!card) { if (currentBubble) { currentBubble.remove(); currentBubble = null; } return; }
@@ -843,6 +860,7 @@
     currentBubble = bubble;
     setTimeout(() => { if (currentBubble === bubble) { bubble.remove(); currentBubble = null; } }, 3000);
   });
+
   function resetRanking() {
     if (confirm("确定重置排行榜吗？所有角色将回到角色池，梯度的自定义名称和颜色会保留。")) {
       const allTierContents = document.querySelectorAll('.tier-content');
@@ -871,7 +889,7 @@
   }
   async function getFixedClone(element) {
     const clone = element.cloneNode(true);
-    // 强制设置克隆体宽度为1400px，确保截图与电脑端布局一致（宽幅、每行多卡）
+    // 强制设置为电脑端宽度，保证截图宽屏布局
     clone.style.width = '1400px';
     clone.style.maxWidth = '1400px';
     clone.style.margin = '0 auto';
@@ -923,7 +941,6 @@
     }
     return clone;
   }
-  let currentRotation = 0;
   async function takeScreenshot() {
     if (typeof html2canvas === 'undefined') { alert("截图库未加载"); return; }
     const captureArea = document.getElementById("captureArea");
@@ -952,16 +969,20 @@
       showPreviewModal(imgData);
     } catch (err) { console.error(err); alert("截图失败"); } finally { toast.remove(); }
   }
+
+  // 预览模态框：支持旋转、双指缩放、全屏
   function showPreviewModal(imgData) {
     let modal = document.querySelector('.preview-modal');
     if (modal) modal.remove();
-    currentRotation = 0;
+    let currentRotation = 0;
+    let currentScale = 1;
+
     modal = document.createElement('div');
     modal.className = 'preview-modal';
     modal.innerHTML = `
       <div class="preview-container">
-        <div style="overflow: auto; max-height: 55vh; text-align: center;">
-          <img class="preview-img" src="${imgData}" style="transform: rotate(0deg); max-width: 100%; max-height: 100%; object-fit: contain;">
+        <div class="preview-img-wrapper">
+          <img class="preview-img" src="${imgData}" style="transform: rotate(0deg) scale(1);">
         </div>
         <div class="preview-tip">📸 长按保存图片（电脑右键另存为）</div>
         <div class="preview-buttons">
@@ -972,35 +993,74 @@
       </div>
     `;
     document.body.appendChild(modal);
-    const imgWrapper = modal.querySelector('.preview-container > div:first-child');
+
+    const wrapper = modal.querySelector('.preview-img-wrapper');
     const imgEl = modal.querySelector('.preview-img');
     const rotateBtn = modal.querySelector('.rotate-btn');
     const fullscreenBtn = modal.querySelector('.fullscreen-btn');
     const closeBtn = modal.querySelector('.close-preview');
     const buttonsDiv = modal.querySelector('.preview-buttons');
     const tipDiv = modal.querySelector('.preview-tip');
+    const container = modal.querySelector('.preview-container');
 
+    // 旋转
     rotateBtn.onclick = () => {
       currentRotation = (currentRotation + 90) % 360;
-      imgEl.style.transform = `rotate(${currentRotation}deg)`;
-      imgWrapper.scrollTop = 0;
-      imgWrapper.scrollLeft = 0;
+      imgEl.style.transform = `rotate(${currentRotation}deg) scale(${currentScale})`;
+      wrapper.scrollTop = 0;
+      wrapper.scrollLeft = 0;
     };
 
+    // 双指缩放
+    let touchStartDistance = 0;
+    let startScale = 1;
+    const getDistance = (touches) => {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.hypot(dx, dy);
+    };
+    wrapper.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        touchStartDistance = getDistance(e.touches);
+        startScale = currentScale;
+      }
+    });
+    wrapper.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const newDistance = getDistance(e.touches);
+        const scaleDelta = newDistance / touchStartDistance;
+        let newScale = startScale * scaleDelta;
+        newScale = Math.min(Math.max(newScale, 0.5), 3);
+        currentScale = newScale;
+        imgEl.style.transform = `rotate(${currentRotation}deg) scale(${currentScale})`;
+      }
+    });
+
+    // 全屏
     function enterFullscreen() {
       buttonsDiv.style.display = 'none';
       tipDiv.style.display = 'none';
-      imgWrapper.style.maxHeight = '90vh';
-      imgWrapper.style.overflow = 'auto';
+      container.style.width = '100%';
+      container.style.height = '100%';
+      wrapper.style.width = '100%';
+      wrapper.style.height = '100%';
+      imgEl.style.maxWidth = '100%';
+      imgEl.style.maxHeight = '100%';
       imgEl.style.cursor = 'zoom-out';
     }
     function exitFullscreen() {
       buttonsDiv.style.display = 'flex';
       tipDiv.style.display = 'block';
-      imgWrapper.style.maxHeight = '55vh';
+      container.style.width = '';
+      container.style.height = '';
+      wrapper.style.width = '';
+      wrapper.style.height = '';
+      imgEl.style.maxWidth = '90%';
+      imgEl.style.maxHeight = '90%';
       imgEl.style.cursor = 'pointer';
     }
-
     fullscreenBtn.onclick = async () => {
       try {
         await modal.requestFullscreen();
@@ -1009,11 +1069,9 @@
         alert("全屏失败");
       }
     };
-
     document.addEventListener('fullscreenchange', () => {
       if (!document.fullscreenElement) exitFullscreen();
     });
-
     imgEl.onclick = () => {
       if (!document.fullscreenElement) {
         modal.requestFullscreen().then(() => enterFullscreen()).catch(() => {});
@@ -1021,9 +1079,9 @@
         document.exitFullscreen();
       }
     };
-
     closeBtn.onclick = () => modal.remove();
   }
+
   function init() {
     renderTiers();
     updatePlusButtons();
