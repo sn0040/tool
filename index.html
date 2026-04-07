@@ -764,22 +764,31 @@
     });
     function closePicker() { modal.classList.remove('open'); currentPickerTarget = null; selectedCardsSet.clear(); }
   }
-  // 将卡片移回备选区（保持顺序）
+  // 将卡片移回备选区（简单追加）
   function moveCardToPool(card) {
     if (currentBubble) currentBubble.remove();
     poolContainer.appendChild(card);
     ensurePlusAtEnd();
   }
-  // 长按显示气泡（仅对梯度榜内的卡片生效）
-  function showBubbleForCard(card) {
-    if (card.parentNode.id === 'pool') return; // 备选区不显示气泡
+  // 显示气泡（统一函数）
+  function showBubbleForCard(card, clientX, clientY) {
+    if (card.parentNode.id === 'pool') return;
     if (currentBubble) currentBubble.remove();
     const bubble = document.createElement('div');
     bubble.className = 'move-bubble';
     bubble.textContent = '移除';
-    const rect = card.getBoundingClientRect();
-    bubble.style.left = rect.left + 'px';
-    bubble.style.top = (rect.top - 45) + 'px';
+    // 根据传入的坐标定位，如果没有则使用卡片中心
+    let left, top;
+    if (clientX !== undefined && clientY !== undefined) {
+      left = clientX - bubble.offsetWidth / 2;
+      top = clientY - 45;
+    } else {
+      const rect = card.getBoundingClientRect();
+      left = rect.left + rect.width / 2 - 30;
+      top = rect.top - 45;
+    }
+    bubble.style.left = left + 'px';
+    bubble.style.top = top + 'px';
     bubble.addEventListener('click', (e2) => {
       e2.stopPropagation();
       moveCardToPool(card);
@@ -791,10 +800,89 @@
     setTimeout(() => { if (currentBubble === bubble) { bubble.remove(); currentBubble = null; } }, 2500);
   }
 
-  // 拖拽（鼠标+触摸）支持长按气泡
+  // ========== 鼠标长按支持 ==========
+  let mouseDownCard = null;
+  let mouseDownX = 0, mouseDownY = 0;
+  let mouseLongPressTimer = null;
+  let mouseMoved = false;
+
+  document.addEventListener('mousedown', (e) => {
+    const card = e.target.closest('.char-card');
+    if (!card) return;
+    // 仅当卡片在梯度榜内时启用长按
+    if (card.parentNode.id === 'pool') return;
+    mouseDownCard = card;
+    mouseDownX = e.clientX;
+    mouseDownY = e.clientY;
+    mouseMoved = false;
+    mouseLongPressTimer = setTimeout(() => {
+      if (mouseDownCard && !mouseMoved) {
+        showBubbleForCard(mouseDownCard, mouseDownX, mouseDownY);
+      }
+    }, 500);
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!mouseDownCard) return;
+    const dx = Math.abs(e.clientX - mouseDownX);
+    const dy = Math.abs(e.clientY - mouseDownY);
+    if (dx > 5 || dy > 5) {
+      mouseMoved = true;
+      if (mouseLongPressTimer) {
+        clearTimeout(mouseLongPressTimer);
+        mouseLongPressTimer = null;
+      }
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (mouseLongPressTimer) {
+      clearTimeout(mouseLongPressTimer);
+      mouseLongPressTimer = null;
+    }
+    mouseDownCard = null;
+  });
+
+  // ========== 触摸长按（原有逻辑优化） ==========
+  let touchCard = null;
+  let touchMoved = false;
+  function initTouchLongPress() {
+    document.querySelectorAll('.char-card').forEach(card => {
+      card.addEventListener('touchstart', (e) => {
+        if (card.parentNode.id === 'pool') return;
+        e.preventDefault();
+        touchCard = card;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchMoved = false;
+        longPressTimer = setTimeout(() => {
+          if (touchCard && !touchMoved && !isDragging) {
+            showBubbleForCard(touchCard, touchStartX, touchStartY);
+          }
+        }, 500);
+      }, { passive: false });
+      card.addEventListener('touchmove', (e) => {
+        if (!touchCard) return;
+        const dx = Math.abs(e.touches[0].clientX - touchStartX);
+        const dy = Math.abs(e.touches[0].clientY - touchStartY);
+        if (dx > 5 || dy > 5) {
+          touchMoved = true;
+          if (longPressTimer) clearTimeout(longPressTimer);
+        }
+      });
+      card.addEventListener('touchend', () => {
+        if (longPressTimer) clearTimeout(longPressTimer);
+        touchCard = null;
+      });
+    });
+  }
+
+  // 拖拽（鼠标+触摸）支持边缘滚动（保留原有逻辑，但避免与长按冲突）
+  let dragStartCard = null;
   document.addEventListener("dragstart", (e) => {
     const card = e.target.closest(".char-card");
     if (!card) return;
+    dragStartCard = card;
     draggingCard = card;
     isDragging = true;
     setTimeout(() => card.style.opacity = "0.5", 0);
@@ -842,14 +930,6 @@
         isDragging = false;
         draggingCard = card;
         card.style.opacity = "0.6";
-        // 长按定时器
-        if (longPressTimer) clearTimeout(longPressTimer);
-        longPressTimer = setTimeout(() => {
-          if (!isDragging && !moved && draggingCard === card) {
-            isLongPress = true;
-            showBubbleForCard(card);
-          }
-        }, 500);
       }, { passive: false });
       card.addEventListener('touchmove', (e) => {
         if (!draggingCard) return;
@@ -859,7 +939,6 @@
         if (!moved && (dx > 5 || dy > 5)) {
           moved = true;
           isDragging = true;
-          if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
         }
         const clientY = touch.clientY;
         const threshold = 75;
@@ -887,19 +966,18 @@
       }, { passive: false });
       card.addEventListener('touchend', (e) => {
         e.preventDefault();
-        if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
         if (draggingCard) {
           draggingCard.style.opacity = "1";
           draggingCard = null;
         }
         isDragging = false;
-        isLongPress = false;
         stopAutoScroll();
         ensurePlusAtEnd();
       });
     });
   }
   initTouchDrag();
+  initTouchLongPress();
 
   function resetRanking() {
     if (confirm("确定重置排行榜吗？所有角色将回到角色池，梯度的自定义名称和颜色会保留。")) {
