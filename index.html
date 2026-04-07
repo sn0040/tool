@@ -418,13 +418,14 @@
       font-size: 12px;
     }
     .row-btn:hover { background: #843FFF; }
-    /* 手机端紧凑 UI */
+    /* 手机端紧凑 UI（行高等比例缩小） */
     @media (max-width: 768px) {
       body { padding: 8px; }
       .title { font-size: 20px; }
-      .tier-label { width: 55px; font-size: 14px; padding: 8px 0; }
+      .tier-row { min-height: auto; }                  /* 让行高由内容撑开 */
+      .tier-content { min-height: 75px; padding: 6px; gap: 6px; }
+      .tier-label { width: 55px; font-size: 14px; padding: 6px 0; }
       .tier-label .label-text { font-size: 12px; }
-      .tier-content { padding: 8px; gap: 6px; }
       .char-card, .add-card-btn {
         width: 65px !important;
         height: 75px !important;
@@ -443,7 +444,7 @@
       .tip { font-size: 10px; }
       .pool { gap: 6px; padding: 8px; }
     }
-    /* 截图预览浮层（全屏双指缩放专用） */
+    /* 截图预览浮层 */
     .preview-modal {
       position: fixed;
       top: 0;
@@ -751,7 +752,9 @@
     });
     function closePicker() { modal.classList.remove('open'); currentPickerTarget = null; selectedCardsSet.clear(); }
   }
-  // 拖拽（鼠标+触摸） 修复 isDragging 重置时机
+  // 拖拽（鼠标+触摸）修复气泡
+  let touchStartX = 0, touchStartY = 0;
+  let movedFlag = false;
   document.addEventListener("dragstart", (e) => {
     const card = e.target.closest(".char-card");
     if (!card) return;
@@ -762,7 +765,7 @@
   });
   document.addEventListener("dragend", (e) => {
     if (draggingCard) { draggingCard.style.opacity = "1"; draggingCard = null; }
-    setTimeout(() => { isDragging = false; }, 10);
+    isDragging = false;
     ensurePlusAtEnd();
   });
   document.addEventListener("dragover", (e) => {
@@ -792,15 +795,26 @@
   }
   function initTouchDrag() {
     document.querySelectorAll('.char-card').forEach(card => {
+      let startX = 0, startY = 0;
+      let moved = false;
       card.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        card.style.opacity = "0.6";
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        moved = false;
+        isDragging = false;
         draggingCard = card;
-        isDragging = true;
+        card.style.opacity = "0.6";
       }, { passive: false });
       card.addEventListener('touchmove', (e) => {
         if (!draggingCard) return;
         const touch = e.touches[0];
+        const dx = Math.abs(touch.clientX - startX);
+        const dy = Math.abs(touch.clientY - startY);
+        if (!moved && (dx > 5 || dy > 5)) {
+          moved = true;
+          isDragging = true;
+        }
         const clientY = touch.clientY;
         const threshold = 75;
         let speed = 0;
@@ -814,7 +828,7 @@
         const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
         const container = targetEl?.closest(".pool, .tier-content");
         const targetCard = targetEl?.closest(".char-card");
-        if (container) {
+        if (container && isDragging) {
           if (!targetCard) container.appendChild(draggingCard);
           else {
             const rect = targetCard.getBoundingClientRect();
@@ -827,8 +841,15 @@
       }, { passive: false });
       card.addEventListener('touchend', (e) => {
         e.preventDefault();
-        if (draggingCard) { draggingCard.style.opacity = "1"; draggingCard = null; }
-        setTimeout(() => { isDragging = false; }, 10);
+        if (draggingCard) {
+          draggingCard.style.opacity = "1";
+          draggingCard = null;
+        }
+        if (isDragging) {
+          setTimeout(() => { isDragging = false; }, 10);
+        } else {
+          isDragging = false;
+        }
         stopAutoScroll();
         ensurePlusAtEnd();
       });
@@ -836,7 +857,7 @@
   }
   initTouchDrag();
 
-  // 单击移回气泡（修复：确保 isDragging 重置后触发）
+  // 单击移回气泡（手机端正常弹出）
   document.body.addEventListener('click', (e) => {
     const card = e.target.closest('.char-card');
     if (!card) { if (currentBubble) { currentBubble.remove(); currentBubble = null; } return; }
@@ -879,7 +900,7 @@
       onEnd: () => bindAllEvents()
     });
   }
-  // 截图修复（强制宽屏 + 去除阴影 + 重绘图片）
+  // 截图修复
   async function waitAllImages() {
     const images = Array.from(document.querySelectorAll('.char-card img'));
     await Promise.all(images.map(img => {
@@ -889,7 +910,6 @@
   }
   async function getFixedClone(element) {
     const clone = element.cloneNode(true);
-    // 强制设置为电脑端宽度，保证截图宽屏布局
     clone.style.width = '1400px';
     clone.style.maxWidth = '1400px';
     clone.style.margin = '0 auto';
@@ -969,14 +989,11 @@
       showPreviewModal(imgData);
     } catch (err) { console.error(err); alert("截图失败"); } finally { toast.remove(); }
   }
-
-  // 预览模态框：支持旋转、双指缩放、全屏
   function showPreviewModal(imgData) {
     let modal = document.querySelector('.preview-modal');
     if (modal) modal.remove();
     let currentRotation = 0;
     let currentScale = 1;
-
     modal = document.createElement('div');
     modal.className = 'preview-modal';
     modal.innerHTML = `
@@ -993,7 +1010,6 @@
       </div>
     `;
     document.body.appendChild(modal);
-
     const wrapper = modal.querySelector('.preview-img-wrapper');
     const imgEl = modal.querySelector('.preview-img');
     const rotateBtn = modal.querySelector('.rotate-btn');
@@ -1002,23 +1018,15 @@
     const buttonsDiv = modal.querySelector('.preview-buttons');
     const tipDiv = modal.querySelector('.preview-tip');
     const container = modal.querySelector('.preview-container');
-
-    // 旋转
     rotateBtn.onclick = () => {
       currentRotation = (currentRotation + 90) % 360;
       imgEl.style.transform = `rotate(${currentRotation}deg) scale(${currentScale})`;
       wrapper.scrollTop = 0;
       wrapper.scrollLeft = 0;
     };
-
-    // 双指缩放
     let touchStartDistance = 0;
     let startScale = 1;
-    const getDistance = (touches) => {
-      const dx = touches[0].clientX - touches[1].clientX;
-      const dy = touches[0].clientY - touches[1].clientY;
-      return Math.hypot(dx, dy);
-    };
+    const getDistance = (touches) => Math.hypot(touches[0].clientX - touches[1].clientX, touches[0].clientY - touches[1].clientY);
     wrapper.addEventListener('touchstart', (e) => {
       if (e.touches.length === 2) {
         e.preventDefault();
@@ -1030,15 +1038,12 @@
       if (e.touches.length === 2) {
         e.preventDefault();
         const newDistance = getDistance(e.touches);
-        const scaleDelta = newDistance / touchStartDistance;
-        let newScale = startScale * scaleDelta;
+        let newScale = startScale * (newDistance / touchStartDistance);
         newScale = Math.min(Math.max(newScale, 0.5), 3);
         currentScale = newScale;
         imgEl.style.transform = `rotate(${currentRotation}deg) scale(${currentScale})`;
       }
     });
-
-    // 全屏
     function enterFullscreen() {
       buttonsDiv.style.display = 'none';
       tipDiv.style.display = 'none';
@@ -1065,9 +1070,7 @@
       try {
         await modal.requestFullscreen();
         enterFullscreen();
-      } catch (err) {
-        alert("全屏失败");
-      }
+      } catch (err) { alert("全屏失败"); }
     };
     document.addEventListener('fullscreenchange', () => {
       if (!document.fullscreenElement) exitFullscreen();
@@ -1081,7 +1084,6 @@
     };
     closeBtn.onclick = () => modal.remove();
   }
-
   function init() {
     renderTiers();
     updatePlusButtons();
