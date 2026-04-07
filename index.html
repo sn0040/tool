@@ -104,6 +104,7 @@
       background: rgba(30, 20, 45, 0.5);
       min-height: 130px;
     }
+    /* 卡片样式 */
     .char-card {
       width: 100px !important;
       height: 110px !important;
@@ -120,7 +121,7 @@
       cursor: grab;
       user-select: none;
       transition: 0.15s;
-      overflow: hidden;
+      overflow: visible;
       flex-shrink: 0 !important;
       touch-action: pan-y;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
@@ -155,22 +156,44 @@
       text-align: center;
       color: #f0eaff;
     }
-    .move-bubble {
-      position: fixed;
-      background: #843FFF;
-      color: white;
-      padding: 8px 16px;
-      border-radius: 40px;
-      font-size: 14px;
-      font-weight: bold;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-      z-index: 10002;
-      cursor: pointer;
-      white-space: nowrap;
+    /* 移除按钮样式：半透明发光，仅在梯度榜内显示 */
+    .remove-btn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 26px;
+      height: 26px;
+      background: rgba(255, 255, 255, 0.3);
       backdrop-filter: blur(4px);
-      transition: 0.1s;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: bold;
+      color: rgba(255, 255, 255, 0.8);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 4px rgba(255,255,255,0.5);
+      z-index: 5;
+      border: 1px solid rgba(255,255,255,0.5);
     }
-    .move-bubble:hover { background: #EE9BFF; transform: scale(1.02); }
+    .remove-btn:hover {
+      background: rgba(255, 80, 80, 0.8);
+      transform: scale(1.1);
+      box-shadow: 0 0 12px rgba(255,80,80,0.8);
+      color: white;
+    }
+    @media (max-width: 768px) {
+      .remove-btn {
+        width: 22px;
+        height: 22px;
+        font-size: 14px;
+        top: -6px;
+        right: -6px;
+      }
+    }
+    /* 加号按钮 */
     .add-card-btn {
       width: 100px !important;
       height: 110px !important;
@@ -418,11 +441,11 @@
       font-size: 12px;
     }
     .row-btn:hover { background: #843FFF; }
-    /* 手机端紧凑 UI（行高等比例缩小） */
+    /* 手机端紧凑 UI */
     @media (max-width: 768px) {
       body { padding: 8px; }
       .title { font-size: 20px; }
-      .tier-row { min-height: auto; }                  /* 让行高由内容撑开 */
+      .tier-row { min-height: auto; }
       .tier-content { min-height: 75px; padding: 6px; gap: 6px; }
       .tier-label { width: 55px; font-size: 14px; padding: 6px 0; }
       .tier-label .label-text { font-size: 12px; }
@@ -549,10 +572,15 @@
   ];
 
   const poolContainer = document.getElementById("pool");
-  function createCharacterCard(imgSrc, name) {
+  // 存储所有卡片的初始顺序（按索引）
+  let allCards = [];
+
+  // 创建卡片（不带移除按钮，移除按钮由后续动态添加）
+  function createCharacterCard(imgSrc, name, index) {
     const card = document.createElement("div");
     card.className = "char-card";
     card.setAttribute("data-name", name);
+    card.setAttribute("data-index", index);   // 记录原始顺序索引
     card.draggable = true;
     const img = document.createElement("img");
     img.src = imgSrc;
@@ -563,16 +591,92 @@
     nameEl.textContent = name;
     card.appendChild(img);
     card.appendChild(nameEl);
+    // 初始不添加移除按钮
     return card;
   }
+
+  // 添加移除按钮（仅在放入梯度榜时调用）
+  function addRemoveButton(card) {
+    if (card.querySelector('.remove-btn')) return;
+    const removeBtn = document.createElement("div");
+    removeBtn.className = "remove-btn";
+    removeBtn.textContent = "✕";
+    removeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      // 将卡片移回备选区，并保持顺序
+      moveCardToPoolPreserveOrder(card);
+    });
+    card.appendChild(removeBtn);
+  }
+
+  // 移除移除按钮（移回备选区时调用）
+  function removeRemoveButton(card) {
+    const btn = card.querySelector('.remove-btn');
+    if (btn) btn.remove();
+  }
+
+  // 将卡片移回备选区并保持原始顺序
+  function moveCardToPoolPreserveOrder(card) {
+    const index = parseInt(card.getAttribute('data-index'));
+    if (isNaN(index)) return;
+    // 找到备选区中所有卡片，按 data-index 排序后确定插入位置
+    const poolCards = Array.from(poolContainer.querySelectorAll('.char-card'));
+    let insertBeforeNode = null;
+    for (let i = 0; i < poolCards.length; i++) {
+      const curIndex = parseInt(poolCards[i].getAttribute('data-index'));
+      if (curIndex > index) {
+        insertBeforeNode = poolCards[i];
+        break;
+      }
+    }
+    // 移除卡片上的移除按钮
+    removeRemoveButton(card);
+    // 插入到正确位置
+    if (insertBeforeNode) {
+      poolContainer.insertBefore(card, insertBeforeNode);
+    } else {
+      poolContainer.appendChild(card);
+    }
+    ensurePlusAtEnd();  // 确保所有行的加号在末尾
+  }
+
+  // 创建所有卡片并填充到备选区（顺序固定）
   imageFiles.forEach((file, idx) => {
-    const card = createCharacterCard(`./assets/${file}`, characterNames[idx]);
+    const card = createCharacterCard(`./assets/${file}`, characterNames[idx], idx);
     poolContainer.appendChild(card);
+    allCards.push(card);
   });
+
+  // 监听卡片被移动到梯度榜（通过拖拽或多选），自动添加移除按钮
+  function onCardMovedToTier(card) {
+    // 如果卡片不在备选区（即被移动到梯度榜），添加移除按钮
+    if (card.parentNode !== poolContainer) {
+      addRemoveButton(card);
+    }
+  }
+
+  // 全局 MutationObserver 监听卡片父节点变化，动态添加/移除按钮
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'childList') {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === 1 && node.classList && node.classList.contains('char-card')) {
+            // 如果添加到的父节点不是备选区，说明进入了梯度榜
+            if (node.parentNode !== poolContainer) {
+              addRemoveButton(node);
+            }
+          }
+        });
+        mutation.removedNodes.forEach((node) => {
+          // 当卡片从梯度榜移除时，不需要额外操作，因为移回备选区时会调用 moveCardToPoolPreserveOrder 处理按钮移除
+        });
+      }
+    });
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
 
   // 全局变量
   let draggingCard = null;
-  let currentBubble = null;
   let sortableInstance = null;
   let isDragging = false;
 
@@ -628,7 +732,9 @@
     }
     const content = row.querySelector('.tier-content');
     const cards = Array.from(content.querySelectorAll('.char-card'));
-    cards.forEach(card => poolContainer.appendChild(card));
+    cards.forEach(card => {
+      moveCardToPoolPreserveOrder(card);
+    });
     row.remove();
     bindAllEvents();
     initSortable();
@@ -746,15 +852,19 @@
     modal.querySelector('.picker-cancel').addEventListener('click', closePicker);
     modal.querySelector('.picker-confirm').addEventListener('click', () => {
       if (selectedCardsSet.size === 0) { alert("请至少选择一个角色"); return; }
-      selectedCardsSet.forEach(card => { if (card.parentNode) currentPickerTarget.appendChild(card); });
+      selectedCardsSet.forEach(card => {
+        if (card.parentNode) {
+          targetContainer.appendChild(card);
+          // 移动后自动添加移除按钮（由 MutationObserver 处理）
+        }
+      });
       ensurePlusAtEnd();
       closePicker();
     });
     function closePicker() { modal.classList.remove('open'); currentPickerTarget = null; selectedCardsSet.clear(); }
   }
-  // 拖拽（鼠标+触摸）修复气泡
-  let touchStartX = 0, touchStartY = 0;
-  let movedFlag = false;
+
+  // 拖拽（鼠标+触摸）
   document.addEventListener("dragstart", (e) => {
     const card = e.target.closest(".char-card");
     if (!card) return;
@@ -845,11 +955,7 @@
           draggingCard.style.opacity = "1";
           draggingCard = null;
         }
-        if (isDragging) {
-          setTimeout(() => { isDragging = false; }, 10);
-        } else {
-          isDragging = false;
-        }
+        isDragging = false;
         stopAutoScroll();
         ensurePlusAtEnd();
       });
@@ -857,37 +963,14 @@
   }
   initTouchDrag();
 
-  // 单击移回气泡（手机端正常弹出）
-  document.body.addEventListener('click', (e) => {
-    const card = e.target.closest('.char-card');
-    if (!card) { if (currentBubble) { currentBubble.remove(); currentBubble = null; } return; }
-    if (isDragging) return;
-    if (card.parentNode.id === 'pool') return;
-    if (currentBubble) currentBubble.remove();
-    const bubble = document.createElement('div');
-    bubble.className = 'move-bubble';
-    bubble.textContent = '➡️ 移回待选区';
-    const rect = card.getBoundingClientRect();
-    bubble.style.left = rect.left + 'px';
-    bubble.style.top = (rect.top - 40) + 'px';
-    bubble.addEventListener('click', (e2) => {
-      e2.stopPropagation();
-      poolContainer.appendChild(card);
-      ensurePlusAtEnd();
-      bubble.remove();
-      currentBubble = null;
-    });
-    document.body.appendChild(bubble);
-    currentBubble = bubble;
-    setTimeout(() => { if (currentBubble === bubble) { bubble.remove(); currentBubble = null; } }, 3000);
-  });
-
   function resetRanking() {
     if (confirm("确定重置排行榜吗？所有角色将回到角色池，梯度的自定义名称和颜色会保留。")) {
       const allTierContents = document.querySelectorAll('.tier-content');
       allTierContents.forEach(container => {
         const cards = Array.from(container.querySelectorAll('.char-card'));
-        cards.forEach(card => poolContainer.appendChild(card));
+        cards.forEach(card => {
+          moveCardToPoolPreserveOrder(card);
+        });
       });
       ensurePlusAtEnd();
     }
@@ -900,7 +983,7 @@
       onEnd: () => bindAllEvents()
     });
   }
-  // 截图修复
+  // 截图修复（强制宽屏 + 去除阴影 + 重绘图片 + 隐藏所有移除按钮）
   async function waitAllImages() {
     const images = Array.from(document.querySelectorAll('.char-card img'));
     await Promise.all(images.map(img => {
@@ -914,8 +997,10 @@
     clone.style.maxWidth = '1400px';
     clone.style.margin = '0 auto';
     clone.style.boxSizing = 'border-box';
+    // 移除所有齿轮、加号和移除按钮
     clone.querySelectorAll('.gear-icon').forEach(el => el.remove());
     clone.querySelectorAll('.add-card-btn').forEach(el => el.remove());
+    clone.querySelectorAll('.remove-btn').forEach(el => el.remove());
     const cards = clone.querySelectorAll('.char-card');
     cards.forEach(card => {
       card.style.background = '#2c2c2c';
